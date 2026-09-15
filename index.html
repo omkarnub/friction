@@ -17,6 +17,17 @@
     rel="stylesheet">
   <link rel="stylesheet" href="styles.css?v=21">
   <link rel="stylesheet" href="StaggeredMenu.css?v=2">
+
+  <!-- PWA: Add to Home Screen support -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0b0b0f">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="μs Lab">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="icon" href="./icons/icon-192.png" sizes="192x192">
+  <link rel="icon" href="./icons/icon-512.png" sizes="512x512">
 </head>
 
 <body>
@@ -103,6 +114,7 @@
       </div>
 
       <div class="nav-actions">
+        <button id="pwa-install-btn" class="theme-toggle" style="display:none;" aria-label="Install app">Install App</button>
         <div class="nav-menu-slot" aria-hidden="true"></div>
       </div>
     </div>
@@ -2443,6 +2455,52 @@
         }
       });
 
+    })();
+  </script>
+
+  <!-- PWA: service worker registration + install prompt -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(console.error);
+      });
+    }
+
+    (function () {
+      let deferredPrompt = null;
+      const installBtn = document.getElementById("pwa-install-btn");
+      const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      const isInStandaloneMode = window.navigator.standalone === true;
+
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (installBtn) installBtn.style.display = "inline-flex";
+      });
+
+      if (installBtn) {
+        installBtn.addEventListener("click", async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installBtn.style.display = "none";
+            return;
+          }
+          if (isIos && !isInStandaloneMode) {
+            alert("To install: tap the Share icon, then 'Add to Home Screen'.");
+          }
+        });
+      }
+
+      window.addEventListener("appinstalled", () => {
+        if (installBtn) installBtn.style.display = "none";
+        deferredPrompt = null;
+      });
+
+      if (isIos && !isInStandaloneMode && installBtn) {
+        installBtn.style.display = "inline-flex";
+      }
     })();
   </script>
 </body>
