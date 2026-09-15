@@ -15,8 +15,8 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Anton&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Lexend:wght@100..900&family=Outfit:wght@100..900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=19">
-  <link rel="stylesheet" href="StaggeredMenu.css">
+  <link rel="stylesheet" href="styles.css?v=21">
+  <link rel="stylesheet" href="StaggeredMenu.css?v=2">
 </head>
 
 <body>
@@ -1503,7 +1503,8 @@
                 <button type="button" class="radix-trigger" id="logMethodDropdownTrigger" aria-haspopup="true"
                   aria-expanded="false" aria-controls="logMethodDropdownContent">
                   <span class="radix-trigger-content">
-                    <span class="radix-method-icon" id="logMethodActiveIcon" style="font-size: 1rem; margin-right: 6px;">📐</span>
+                    <span class="radix-method-icon" id="logMethodActiveIcon"
+                      style="font-size: 1rem; margin-right: 6px;">📐</span>
                     <span class="radix-active-text" id="logMethodActiveText">Angle of Repose</span>
                   </span>
                   <svg class="radix-chevron" viewBox="0 0 15 15" width="14" height="14" fill="none"
@@ -1563,8 +1564,10 @@
           </div>
 
           <div class="btn-group">
-            <button class="btn btn-secondary btn-sm" id="copyLogBtn" title="Copy table data as formatted text/TSV">📋 Copy Data</button>
-            <button class="btn btn-secondary btn-sm" id="exportCsvBtn" title="Export readings as CSV">📊 Export CSV</button>
+            <button class="btn btn-secondary btn-sm" id="copyLogBtn" title="Copy table data as formatted text/TSV">📋
+              Copy Data</button>
+            <button class="btn btn-secondary btn-sm" id="exportCsvBtn" title="Export readings as CSV">📊 Export
+              CSV</button>
             <button class="btn btn-primary btn-sm" id="exportPdfBtn">📄 Export PDF</button>
             <button class="btn btn-danger btn-sm" id="clearLogBtn">🗑 Clear Log</button>
           </div>
@@ -1575,14 +1578,27 @@
           <div class="form-control animated-input-bar" id="ctrlReposeAngle">
             <input type="number" id="logReposeAngle" min="0" max="90" step="0.5" required autocomplete="off">
             <label for="logReposeAngle">
-              <span style="transition-delay:0ms">A</span><span style="transition-delay:30ms">n</span><span style="transition-delay:60ms">g</span><span style="transition-delay:90ms">l</span><span style="transition-delay:120ms">e</span><span style="transition-delay:150ms">&nbsp;</span><span style="transition-delay:180ms">α</span><span style="transition-delay:210ms">&nbsp;</span><span style="transition-delay:240ms">(</span><span style="transition-delay:270ms">°</span><span style="transition-delay:300ms">)</span>
+              <span style="transition-delay:0ms">A</span><span style="transition-delay:30ms">n</span><span
+                style="transition-delay:60ms">g</span><span style="transition-delay:90ms">l</span><span
+                style="transition-delay:120ms">e</span><span style="transition-delay:150ms">&nbsp;</span><span
+                style="transition-delay:180ms">α</span><span style="transition-delay:210ms">&nbsp;</span><span
+                style="transition-delay:240ms">(</span><span style="transition-delay:270ms">°</span><span
+                style="transition-delay:300ms">)</span>
             </label>
             <div class="stepper-arrows">
-              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logReposeAngle" data-delta="0.5" aria-label="Increase Angle">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l4-4 4 4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logReposeAngle"
+                data-delta="0.5" aria-label="Increase Angle">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 8l4-4 4 4" />
+                </svg>
               </button>
-              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logReposeAngle" data-delta="-0.5" aria-label="Decrease Angle">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l4 4 4-4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logReposeAngle"
+                data-delta="-0.5" aria-label="Decrease Angle">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 4l4 4 4-4" />
+                </svg>
               </button>
             </div>
           </div>
@@ -1590,19 +1606,33 @@
           <div class="form-control animated-input-bar" id="ctrlReposeW">
             <input type="number" id="logReposeW" min="0.1" max="50" step="0.5" required autocomplete="off">
             <label for="logReposeW">
-              <span style="transition-delay:0ms">W</span><span style="transition-delay:30ms">e</span><span style="transition-delay:60ms">i</span><span style="transition-delay:90ms">g</span><span style="transition-delay:120ms">h</span><span style="transition-delay:150ms">t</span><span style="transition-delay:180ms">&nbsp;</span><span style="transition-delay:210ms">W</span><span style="transition-delay:240ms">&nbsp;</span><span style="transition-delay:270ms">(</span><span style="transition-delay:300ms">N</span><span style="transition-delay:330ms">)</span>
+              <span style="transition-delay:0ms">W</span><span style="transition-delay:30ms">e</span><span
+                style="transition-delay:60ms">i</span><span style="transition-delay:90ms">g</span><span
+                style="transition-delay:120ms">h</span><span style="transition-delay:150ms">t</span><span
+                style="transition-delay:180ms">&nbsp;</span><span style="transition-delay:210ms">W</span><span
+                style="transition-delay:240ms">&nbsp;</span><span style="transition-delay:270ms">(</span><span
+                style="transition-delay:300ms">N</span><span style="transition-delay:330ms">)</span>
             </label>
             <div class="stepper-arrows">
-              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logReposeW" data-delta="0.5" aria-label="Increase Weight">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l4-4 4 4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logReposeW" data-delta="0.5"
+                aria-label="Increase Weight">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 8l4-4 4 4" />
+                </svg>
               </button>
-              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logReposeW" data-delta="-0.5" aria-label="Decrease Weight">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l4 4 4-4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logReposeW"
+                data-delta="-0.5" aria-label="Decrease Weight">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 4l4 4 4-4" />
+                </svg>
               </button>
             </div>
           </div>
 
-          <button class="btn btn-primary" id="logAddReposeBtn" style="height: fit-content; min-height: 44px; margin-bottom: 8px;">+ Add Trial</button>
+          <button class="btn btn-primary" id="logAddReposeBtn"
+            style="height: fit-content; min-height: 44px; margin-bottom: 8px;">+ Add Trial</button>
         </div>
 
         <!-- Entry form - Friction Plane (Animated Wave Input Bar + Steppers) -->
@@ -1610,14 +1640,27 @@
           <div class="form-control animated-input-bar" id="ctrlFrictionAngle">
             <input type="number" id="logFrictionAngle" min="0" max="90" step="0.5" required autocomplete="off">
             <label for="logFrictionAngle">
-              <span style="transition-delay:0ms">A</span><span style="transition-delay:30ms">n</span><span style="transition-delay:60ms">g</span><span style="transition-delay:90ms">l</span><span style="transition-delay:120ms">e</span><span style="transition-delay:150ms">&nbsp;</span><span style="transition-delay:180ms">θ</span><span style="transition-delay:210ms">&nbsp;</span><span style="transition-delay:240ms">(</span><span style="transition-delay:270ms">°</span><span style="transition-delay:300ms">)</span>
+              <span style="transition-delay:0ms">A</span><span style="transition-delay:30ms">n</span><span
+                style="transition-delay:60ms">g</span><span style="transition-delay:90ms">l</span><span
+                style="transition-delay:120ms">e</span><span style="transition-delay:150ms">&nbsp;</span><span
+                style="transition-delay:180ms">θ</span><span style="transition-delay:210ms">&nbsp;</span><span
+                style="transition-delay:240ms">(</span><span style="transition-delay:270ms">°</span><span
+                style="transition-delay:300ms">)</span>
             </label>
             <div class="stepper-arrows">
-              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logFrictionAngle" data-delta="0.5" aria-label="Increase Angle">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l4-4 4 4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logFrictionAngle"
+                data-delta="0.5" aria-label="Increase Angle">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 8l4-4 4 4" />
+                </svg>
               </button>
-              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logFrictionAngle" data-delta="-0.5" aria-label="Decrease Angle">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l4 4 4-4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logFrictionAngle"
+                data-delta="-0.5" aria-label="Decrease Angle">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 4l4 4 4-4" />
+                </svg>
               </button>
             </div>
           </div>
@@ -1625,14 +1668,27 @@
           <div class="form-control animated-input-bar" id="ctrlFrictionW">
             <input type="number" id="logFrictionW" min="0.1" max="50" step="0.5" required autocomplete="off">
             <label for="logFrictionW">
-              <span style="transition-delay:0ms">W</span><span style="transition-delay:30ms">e</span><span style="transition-delay:60ms">i</span><span style="transition-delay:90ms">g</span><span style="transition-delay:120ms">h</span><span style="transition-delay:150ms">t</span><span style="transition-delay:180ms">&nbsp;</span><span style="transition-delay:210ms">W</span><span style="transition-delay:240ms">&nbsp;</span><span style="transition-delay:270ms">(</span><span style="transition-delay:300ms">N</span><span style="transition-delay:330ms">)</span>
+              <span style="transition-delay:0ms">W</span><span style="transition-delay:30ms">e</span><span
+                style="transition-delay:60ms">i</span><span style="transition-delay:90ms">g</span><span
+                style="transition-delay:120ms">h</span><span style="transition-delay:150ms">t</span><span
+                style="transition-delay:180ms">&nbsp;</span><span style="transition-delay:210ms">W</span><span
+                style="transition-delay:240ms">&nbsp;</span><span style="transition-delay:270ms">(</span><span
+                style="transition-delay:300ms">N</span><span style="transition-delay:330ms">)</span>
             </label>
             <div class="stepper-arrows">
-              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logFrictionW" data-delta="0.5" aria-label="Increase Weight">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l4-4 4 4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logFrictionW"
+                data-delta="0.5" aria-label="Increase Weight">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 8l4-4 4 4" />
+                </svg>
               </button>
-              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logFrictionW" data-delta="-0.5" aria-label="Decrease Weight">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l4 4 4-4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logFrictionW"
+                data-delta="-0.5" aria-label="Decrease Weight">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 4l4 4 4-4" />
+                </svg>
               </button>
             </div>
           </div>
@@ -1640,19 +1696,32 @@
           <div class="form-control animated-input-bar" id="ctrlFrictionP">
             <input type="number" id="logFrictionP" min="0" max="50" step="0.5" required autocomplete="off">
             <label for="logFrictionP">
-              <span style="transition-delay:0ms">P</span><span style="transition-delay:30ms">u</span><span style="transition-delay:60ms">l</span><span style="transition-delay:90ms">l</span><span style="transition-delay:120ms">&nbsp;</span><span style="transition-delay:150ms">P</span><span style="transition-delay:180ms">&nbsp;</span><span style="transition-delay:210ms">(</span><span style="transition-delay:240ms">N</span><span style="transition-delay:270ms">)</span>
+              <span style="transition-delay:0ms">P</span><span style="transition-delay:30ms">u</span><span
+                style="transition-delay:60ms">l</span><span style="transition-delay:90ms">l</span><span
+                style="transition-delay:120ms">&nbsp;</span><span style="transition-delay:150ms">P</span><span
+                style="transition-delay:180ms">&nbsp;</span><span style="transition-delay:210ms">(</span><span
+                style="transition-delay:240ms">N</span><span style="transition-delay:270ms">)</span>
             </label>
             <div class="stepper-arrows">
-              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logFrictionP" data-delta="0.5" aria-label="Increase Pull Force">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8l4-4 4 4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-up" data-step-target="logFrictionP"
+                data-delta="0.5" aria-label="Increase Pull Force">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 8l4-4 4 4" />
+                </svg>
               </button>
-              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logFrictionP" data-delta="-0.5" aria-label="Decrease Pull Force">
-                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4l4 4 4-4"/></svg>
+              <button type="button" class="stepper-arrow-btn stepper-down" data-step-target="logFrictionP"
+                data-delta="-0.5" aria-label="Decrease Pull Force">
+                <svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 4l4 4 4-4" />
+                </svg>
               </button>
             </div>
           </div>
 
-          <button class="btn btn-primary" id="logAddFrictionBtn" style="height: fit-content; min-height: 44px; margin-bottom: 8px;">+ Add Trial</button>
+          <button class="btn btn-primary" id="logAddFrictionBtn"
+            style="height: fit-content; min-height: 44px; margin-bottom: 8px;">+ Add Trial</button>
         </div>
 
         <!-- Data table -->
@@ -1668,7 +1737,8 @@
           <div class="empty-state" id="logEmpty">
             <div class="empty-state-icon">📋</div>
             <div class="empty-state-title">No trials recorded yet</div>
-            <div class="empty-state-desc">Add readings using the form above, click "Add to Data Log" from the simulator, or load sample data for instant demonstration.</div>
+            <div class="empty-state-desc">Add readings using the form above, click "Add to Data Log" from the simulator,
+              or load sample data for instant demonstration.</div>
             <div class="mt-md">
               <button type="button" class="btn btn-secondary btn-sm" id="logLoadDemoBtn">⚡ Load Sample Trials</button>
             </div>
@@ -1885,13 +1955,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="js/gsap.min.js?v=2"></script>
   <script src="js/ScrollTrigger.min.js?v=2"></script>
-  <script src="js/home-showcase.js?v=2"></script>
+  <script src="js/home-showcase.js?v=4"></script>
   <script src="js/theory.js?v=2"></script>
   <script src="js/simulate.js?v=17"></script>
   <script src="js/data-log.js?v=3"></script>
   <script src="js/compare.js?v=2"></script>
   <script src="js/pdf-export.js?v=3"></script>
-  <script src="js/staggered-menu.bundle.js?v=16"></script>
+  <script src="js/staggered-menu.bundle.js?v=17"></script>
   <script src="js/get-started-bg.js?v=2"></script>
 
   <script>

@@ -533,30 +533,55 @@
   /* ================================================================
      PART 2 — Scroll Reveal (Word-by-word blur + opacity on scroll)
      ================================================================ */
+  let scrollRevealInitialized = false;
+
   function initScrollReveal() {
+    const textEls = document.querySelectorAll('[data-sr-text]');
+    const isMobile = window.innerWidth <= 768;
+
+    if (isMobile) {
+      // Mobile platform: No text scroll animation at all — clean, static, 100% smooth scrolling
+      textEls.forEach(el => {
+        el.style.opacity = '1';
+        el.style.filter = 'none';
+        el.querySelectorAll('.sr-word').forEach(span => {
+          span.style.opacity = '1';
+          span.style.filter = 'none';
+          span.style.transform = 'none';
+        });
+      });
+      document.querySelectorAll('.learn-point-number').forEach(el => {
+        el.style.opacity = '0.4';
+        el.style.transform = 'none';
+      });
+      return;
+    }
+
+    // Desktop platform: Original word-by-word blur-to-clear + opacity scroll reveal animation
     if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
     gsap.registerPlugin(ScrollTrigger);
 
-    const textEls = document.querySelectorAll('[data-sr-text]');
-
     textEls.forEach(el => {
-      const raw = el.textContent.trim();
-      if (!raw) return;
+      let wordSpans = el.querySelectorAll('.sr-word');
+      if (!wordSpans.length) {
+        const raw = el.textContent.trim();
+        if (!raw) return;
 
-      // Split into words, wrap each in a span
-      el.innerHTML = '';
-      const words = raw.split(/\s+/);
-      words.forEach((word, i) => {
-        const span = document.createElement('span');
-        span.className = 'sr-word';
-        span.textContent = word;
-        el.appendChild(span);
-        if (i < words.length - 1) {
-          el.appendChild(document.createTextNode(' '));
-        }
-      });
+        el.innerHTML = '';
+        const words = raw.split(/\s+/);
+        words.forEach((word, i) => {
+          const span = document.createElement('span');
+          span.className = 'sr-word';
+          span.textContent = word;
+          el.appendChild(span);
+          if (i < words.length - 1) {
+            el.appendChild(document.createTextNode(' '));
+          }
+        });
+        wordSpans = el.querySelectorAll('.sr-word');
+      }
 
-      const wordSpans = el.querySelectorAll('.sr-word');
+      if (!wordSpans.length) return;
 
       // Base opacity animation
       gsap.fromTo(wordSpans,
@@ -591,7 +616,7 @@
       );
     });
 
-    // Also animate the learn-point-number elements
+    // Also animate the learn-point-number elements on desktop
     document.querySelectorAll('.learn-point-number').forEach(el => {
       gsap.fromTo(el,
         { opacity: 0.1, y: 20 },
@@ -608,6 +633,69 @@
         }
       );
     });
+
+    scrollRevealInitialized = true;
+  }
+
+
+  /* ================================================================
+     PART 3 — Viewport Visibility Optimization
+     Pauses offscreen SVG animation loops to free up 100% CPU on mobile
+     ================================================================ */
+  let visibilityObserverInitialized = false;
+
+  function setupShowcaseVisibilityObserver() {
+    if (visibilityObserverInitialized || !('IntersectionObserver' in window)) return;
+    visibilityObserverInitialized = true;
+
+    const simShowcase = document.getElementById('simShowcase');
+    if (simShowcase) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (masterShowcaseTl) {
+            if (entry.isIntersecting) {
+              masterShowcaseTl.play();
+            } else {
+              masterShowcaseTl.pause();
+            }
+          }
+        });
+      }, { rootMargin: '120px 0px 120px 0px', threshold: 0.05 });
+      observer.observe(simShowcase);
+    }
+
+    const reposeCard = document.getElementById('mrReposeSim') || document.querySelector('.learn-method-card');
+    if (reposeCard) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (mrReposeTl) {
+            if (entry.isIntersecting) {
+              mrReposeTl.play();
+            } else {
+              mrReposeTl.pause();
+            }
+          }
+        });
+      }, { rootMargin: '120px 0px 120px 0px', threshold: 0.05 });
+      observer.observe(reposeCard);
+    }
+
+    const cards = document.querySelectorAll('.learn-method-card');
+    const frictionCard = document.getElementById('mfFrictionSim') || (cards.length > 1 ? cards[1] : null);
+    if (frictionCard) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (mfFrictionTl) {
+            if (entry.isIntersecting) {
+              mfFrictionTl.play();
+            } else {
+              mfFrictionTl.pause();
+            }
+          }
+        });
+      }, { rootMargin: '120px 0px 120px 0px', threshold: 0.05 });
+      observer.observe(frictionCard);
+    }
   }
 
 
@@ -615,13 +703,13 @@
      INIT — Hook into page lifecycle
      ================================================================ */
   function tryInit() {
-    // Only init showcase when home page is visible
     const homePage = document.getElementById('page-home');
     if (homePage && homePage.classList.contains('active')) {
       initShowcase();
       buildReposeMethodLoop();
       buildFrictionMethodLoop();
       initScrollReveal();
+      setupShowcaseVisibilityObserver();
     }
   }
 
@@ -638,8 +726,9 @@
       initShowcase();
       buildReposeMethodLoop();
       buildFrictionMethodLoop();
+      setupShowcaseVisibilityObserver();
 
-      // Re-init scroll reveal triggers
+      // Refresh scroll reveal triggers
       setTimeout(() => {
         ScrollTrigger.refresh();
       }, 100);

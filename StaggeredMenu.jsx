@@ -59,9 +59,9 @@ export const StaggeredMenu = ({
       preLayerElsRef.current = preLayers;
 
       const offscreen = position === 'left' ? -100 : 100;
-      gsap.set([panel, ...preLayers], { xPercent: offscreen, opacity: 1 });
+      gsap.set([panel, ...preLayers], { xPercent: offscreen, opacity: 1, visibility: 'hidden', force3D: true });
       if (preContainer) {
-        gsap.set(preContainer, { xPercent: 0, opacity: 1 });
+        gsap.set(preContainer, { xPercent: 0, opacity: 1, visibility: 'hidden' });
       }
       gsap.set(plusH, { transformOrigin: '50% 50%', rotate: 0 });
       gsap.set(plusV, { transformOrigin: '50% 50%', rotate: 90 });
@@ -106,18 +106,23 @@ export const StaggeredMenu = ({
       gsap.set(socialLinks, { y: 25, opacity: 0 });
     }
 
+    if (preLayersRef.current) {
+      gsap.set(preLayersRef.current, { visibility: 'visible' });
+    }
+    gsap.set([panel, ...layers], { visibility: 'visible', force3D: true });
+
     const tl = gsap.timeline({ paused: true });
 
     layerStates.forEach((ls, i) => {
-      tl.fromTo(ls.el, { xPercent: ls.start }, { xPercent: 0, duration: 0.5, ease: 'power4.out' }, i * 0.07);
+      tl.fromTo(ls.el, { xPercent: ls.start, force3D: true }, { xPercent: 0, duration: 0.5, ease: 'power4.out', force3D: true }, i * 0.07);
     });
     const lastTime = layerStates.length ? (layerStates.length - 1) * 0.07 : 0;
     const panelInsertTime = lastTime + (layerStates.length ? 0.08 : 0);
     const panelDuration = 0.65;
     tl.fromTo(
       panel,
-      { xPercent: panelStart },
-      { xPercent: 0, duration: panelDuration, ease: 'power4.out' },
+      { xPercent: panelStart, force3D: true },
+      { xPercent: 0, duration: panelDuration, ease: 'power4.out', force3D: true },
       panelInsertTime
     );
 
@@ -214,8 +219,11 @@ export const StaggeredMenu = ({
       xPercent: offscreen,
       duration: 0.32,
       ease: 'power3.in',
+      force3D: true,
       overwrite: 'auto',
       onComplete: () => {
+        gsap.set(all, { visibility: 'hidden' });
+        if (preLayersRef.current) gsap.set(preLayersRef.current, { visibility: 'hidden' });
         const itemEls = Array.from(panel.querySelectorAll('.sm-panel-itemLabel'));
         if (itemEls.length) {
           gsap.set(itemEls, { yPercent: 140, rotate: 10 });
@@ -280,26 +288,10 @@ export const StaggeredMenu = ({
     if (!inner) return;
     textCycleAnimRef.current?.kill();
 
-    const currentLabel = opening ? 'Menu' : 'Close';
-    const targetLabel = opening ? 'Close' : 'Menu';
-    const cycles = 3;
-    const seq = [currentLabel];
-    let last = currentLabel;
-    for (let i = 0; i < cycles; i++) {
-      last = last === 'Menu' ? 'Close' : 'Menu';
-      seq.push(last);
-    }
-    if (last !== targetLabel) seq.push(targetLabel);
-    seq.push(targetLabel);
-    setTextLines(seq);
-
-    gsap.set(inner, { yPercent: 0 });
-    const lineCount = seq.length;
-    const finalShift = ((lineCount - 1) / lineCount) * 100;
     textCycleAnimRef.current = gsap.to(inner, {
-      yPercent: -finalShift,
-      duration: 0.5 + lineCount * 0.07,
-      ease: 'power4.out'
+      yPercent: opening ? -50 : 0,
+      duration: 0.38,
+      ease: 'power3.out'
     });
   }, []);
 

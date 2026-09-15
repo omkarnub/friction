@@ -72,9 +72,10 @@
         vec2 s = q;
         vec3 sumCol = vec3(0.0);
         float cover = 0.0;
+        float totalW = 0.0;
         for (int i = 0; i < MAX_COLORS; ++i) {
           if (i >= uColorCount) break;
-          s -= 0.01;
+          s -= 0.045;
           vec2 r = sin(1.5 * (s.yx * uFrequency) + 2.0 * cos(s * uFrequency));
           float m0 = length(r + sin(5.0 * r.y * uFrequency - 3.0 * t + float(i)) / 4.0);
           float kBelow = clamp(uWarpStrength, 0.0, 1.0);
@@ -86,9 +87,10 @@
           float m = mix(m0, m1, kMix);
           float w = 1.0 - exp(-uBandWidth / exp(uBandWidth * m));
           sumCol += uColors[i] * w;
+          totalW += w;
           cover = max(cover, w);
         }
-        col = clamp(sumCol, 0.0, 1.0);
+        col = clamp(sumCol / max(totalW, 1.0), 0.0, 1.0);
         a = uTransparent > 0 ? cover : 1.0;
       } else {
         vec2 s = q;
@@ -121,21 +123,23 @@
     }
   `;
 
-  // Palette definitions: pure monochrome elegance
+  // Palette definitions: brushed-metal spectrum (anthracite -> bronze/amber -> ice-blue steel)
+  // Sampled from a metallic ribbon reference: dark gunmetal base, warm amber/bronze core light,
+  // cool ice-blue steel edge light. Whites deliberately clamped out; no single-hue concentric look.
   const PALETTES = {
     dark: {
-      bends: ['#0d0e12', '#181920', '#282a35', '#3f4252', '#5e6278', '#858aa5'],
+      bends: ['#0a0a0d', '#6b4a2c', '#2f4456', '#c68a49', '#33313a', '#5c8aa8', '#1c1d24', '#d1a86a'],
       bendsClear: [0.035, 0.035, 0.045, 1.0],
-      dotGradientFrom: 'rgba(255, 255, 255, 0.34)',
-      dotGradientTo: 'rgba(210, 218, 235, 0.10)',
-      cursorGlow: 'rgba(255, 255, 255, 0.12)'
+      dotGradientFrom: 'rgba(230, 200, 160, 0.28)',
+      dotGradientTo: 'rgba(120, 165, 200, 0.10)',
+      cursorGlow: 'rgba(220, 190, 150, 0.12)'
     },
     light: {
-      bends: ['#f2f3f7', '#e2e3ea', '#cbcedb', '#afb3c4', '#8c91a3'],
+      bends: ['#e7e8ee', '#8a6136', '#556e85', '#b98a55', '#cfd2dd', '#7fa3bf', '#aeb2c3', '#8a8f9e'],
       bendsClear: [0.97, 0.97, 0.98, 1.0],
-      dotGradientFrom: 'rgba(20, 24, 32, 0.30)',
-      dotGradientTo: 'rgba(60, 68, 85, 0.08)',
-      cursorGlow: 'rgba(20, 24, 32, 0.07)'
+      dotGradientFrom: 'rgba(120, 80, 40, 0.26)',
+      dotGradientTo: 'rgba(60, 90, 110, 0.08)',
+      cursorGlow: 'rgba(90, 70, 45, 0.07)'
     }
   };
 
@@ -221,11 +225,11 @@
         // Quad geometry
         const vertices = new Float32Array([
           -1, -1,
-           1, -1,
-          -1,  1,
-          -1,  1,
-           1, -1,
-           1,  1
+          1, -1,
+          -1, 1,
+          -1, 1,
+          1, -1,
+          1, 1
         ]);
         glBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, glBuffer);
@@ -281,18 +285,18 @@
 
     // ColorBends parameters
     const bendsProps = {
-      speed: 0.18,
-      rotation: 85,
-      autoRotate: 2.5,
-      scale: 1.05,
-      frequency: 0.95,
+      speed: 0.15,
+      rotation: 35,
+      autoRotate: 1.6,
+      scale: 1.2,
+      frequency: 0.85,
       warpStrength: 1.0,
-      mouseInfluence: isMobile ? 0.4 : 0.85,
-      parallax: isMobile ? 0.25 : 0.45,
-      noise: 0.12,
+      mouseInfluence: isMobile ? 0.35 : 0.7,
+      parallax: isMobile ? 0.22 : 0.4,
+      noise: 0.08,
       iterations: isMobile ? 1 : 2,
-      intensity: 1.45,
-      bandWidth: 5.5,
+      intensity: 1.3,
+      bandWidth: 5.8,
       transparent: 1,
       ndcPointer: [0, 0]
     };
