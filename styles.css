@@ -1,5 +1,5 @@
 /* ===================================================================
-   Coefficient of Friction haha— Virtual Lab Simulator
+   Coefficient of Friction — Virtual Lab Simulator
    Design System & Component Styles
    =================================================================== */
 
@@ -791,6 +791,50 @@ body::before {
   color: var(--accent-amber);
   border-color: var(--accent-amber);
   background: var(--accent-amber-dim);
+}
+
+/* PWA Install Button */
+#pwa-install-btn {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  width: auto;
+  border: 1px solid var(--border-card);
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+#pwa-install-btn::before {
+  content: "⭳";
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+#pwa-install-btn:hover {
+  color: var(--accent-amber);
+  border-color: var(--accent-amber);
+  background: var(--accent-amber-dim);
+}
+
+#pwa-install-btn:active {
+  transform: scale(0.96);
+}
+
+@media (max-width: 640px) {
+  #pwa-install-btn {
+    padding: 0 10px;
+    font-size: 0.72rem;
+  }
 }
 
 /* Hamburger */
