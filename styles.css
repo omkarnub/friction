@@ -1669,6 +1669,8 @@ td.invalid {
   position: relative;
   z-index: 1;
   transition: color var(--transition-fast);
+  text-align: center;
+  width: 100%;
 }
 
 .get-started-title .highlight {
@@ -3095,9 +3097,34 @@ td.invalid {
   .get-started-actions .btn {
     width: 100%;
   }
+
+  .get-started-title {
+    font-size: clamp(1.85rem, 7.5vw, 3rem);
+    text-align: center;
+    line-height: 1.15;
+    padding: 0 4px;
+  }
+
+  .get-started-title .split-parent {
+    text-align: center;
+    display: inline-block;
+    max-width: 100%;
+  }
 }
 
 @media (max-width: 480px) {
+  .get-started-title {
+    font-size: clamp(1.6rem, 8vw, 2.3rem);
+    text-align: center;
+    line-height: 1.18;
+  }
+
+  .get-started-title .split-parent {
+    text-align: center;
+    display: inline-block;
+    max-width: 100%;
+  }
+
   .hero-stats {
     flex-direction: column;
     gap: var(--space-md);
