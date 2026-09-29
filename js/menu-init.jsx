@@ -6,6 +6,7 @@ const menuItems = [
   { label: 'Home', link: '#home', ariaLabel: 'Home Page' },
   { label: 'Simulate', link: '#simulate', ariaLabel: 'Simulation Lab' },
   { label: 'Data Log', link: '#log', ariaLabel: 'Experimental Data Log' },
+  { label: 'How to Use', link: '#how-to-use', ariaLabel: 'User Manual' },
   { label: 'Methods', link: '#methods', ariaLabel: 'Experimental Methods' },
   { label: 'Reference', link: '#reference', ariaLabel: 'Material References' },
   { label: 'Theory', link: '#theory', ariaLabel: 'Theory & Formulations' },

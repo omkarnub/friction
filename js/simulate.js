@@ -715,8 +715,22 @@
   function checkReposeSlip(angleDeg, weight) {
     if (simState.repose.sliding) return;
 
+    // Warning haptic nudge when approaching critical angle (within 1.2 degrees)
+    if (window.SimHaptics && !simState.repose.warned) {
+      if (simState.repose.threshold - angleDeg <= 1.2 && simState.repose.threshold - angleDeg > 0) {
+        simState.repose.warned = true;
+        window.SimHaptics.warningFeedback();
+      }
+    }
+    if (simState.repose.warned && simState.repose.threshold - angleDeg > 1.8) {
+      simState.repose.warned = false;
+    }
+
     if (angleDeg >= simState.repose.threshold) {
       simState.repose.sliding = true;
+
+      // Haptic feedback for slip event
+      if (window.SimHaptics) window.SimHaptics.slipFeedback();
 
       // Display slip banner with critical angle
       const indicator = document.getElementById('reposeSlipIndicator');
@@ -751,6 +765,7 @@
     if (indicator) indicator.setAttribute('opacity', '0');
 
     simState.repose.sliding = false;
+    simState.repose.warned = false;
     if (simState.repose.timer) {
       clearTimeout(simState.repose.timer);
       simState.repose.timer = null;
@@ -1134,6 +1149,7 @@
 
   function resetFrictionApparatus() {
     frictionForceSlider.value = 0;
+    simState.friction.moving = false;
     refreshFrictionThreshold(frictionMaterialSelect.value);
     renderFrictionSVG();
     updateFrictionReadout();
@@ -1198,14 +1214,20 @@
       if (statusEl) statusEl.innerHTML = '<span class="status-badge error">P is below downhill gravity (W sin θ)</span>';
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge error">P &lt; W sin θ</span>';
     } else if (willMove) {
+      if (!simState.friction.moving) {
+        simState.friction.moving = true;
+        if (window.SimHaptics) window.SimHaptics.motionStartFeedback();
+      }
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = 'var(--accent-green)'; }
       if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Block is moving up plane — Limiting pull P reached ✓</span>';
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Moving ▲</span>';
     } else if (pullForce <= 0) {
+      simState.friction.moving = false;
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = ''; }
       if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Pan is empty (P = 0 N) — Add slotted weights to pan</span>';
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Empty Pan</span>';
     } else {
+      simState.friction.moving = false;
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = ''; }
       if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Static equilibrium — Add more weights until block slides</span>';
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Stable</span>';

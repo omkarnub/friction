@@ -9,9 +9,47 @@ let html = fs.readFileSync(path.join(rootDir, 'index.html'), 'utf8');
 // 1. Base64 encode icons for standalone file
 const icon192Base64 = fs.readFileSync(path.join(rootDir, 'icons', 'icon-192.png')).toString('base64');
 const icon512Base64 = fs.readFileSync(path.join(rootDir, 'icons', 'icon-512.png')).toString('base64');
+const iconMask192File = path.join(rootDir, 'icons', 'icon-maskable-192.png');
+const iconMask512File = path.join(rootDir, 'icons', 'icon-maskable-512.png');
+const iconMask192DataUri = fs.existsSync(iconMask192File)
+  ? `data:image/png;base64,${fs.readFileSync(iconMask192File).toString('base64')}` : null;
+const iconMask512DataUri = fs.existsSync(iconMask512File)
+  ? `data:image/png;base64,${fs.readFileSync(iconMask512File).toString('base64')}` : null;
 
 const icon192DataUri = `data:image/png;base64,${icon192Base64}`;
 const icon512DataUri = `data:image/png;base64,${icon512Base64}`;
+
+const manifestIcons = [
+  {
+    src: icon192DataUri,
+    sizes: "192x192",
+    type: "image/png",
+    purpose: "any"
+  },
+  {
+    src: icon512DataUri,
+    sizes: "512x512",
+    type: "image/png",
+    purpose: "any"
+  }
+];
+
+if (iconMask192DataUri) {
+  manifestIcons.push({
+    src: iconMask192DataUri,
+    sizes: "192x192",
+    type: "image/png",
+    purpose: "maskable"
+  });
+}
+if (iconMask512DataUri) {
+  manifestIcons.push({
+    src: iconMask512DataUri,
+    sizes: "512x512",
+    type: "image/png",
+    purpose: "maskable"
+  });
+}
 
 // Create embedded manifest
 const manifestObj = {
@@ -24,20 +62,7 @@ const manifestObj = {
   orientation: "any",
   background_color: "#0b0b0f",
   theme_color: "#0b0b0f",
-  icons: [
-    {
-      src: icon192DataUri,
-      sizes: "192x192",
-      type: "image/png",
-      purpose: "any"
-    },
-    {
-      src: icon512DataUri,
-      sizes: "512x512",
-      type: "image/png",
-      purpose: "any"
-    }
-  ]
+  icons: manifestIcons
 };
 const manifestDataUri = `data:application/manifest+json;base64,${Buffer.from(JSON.stringify(manifestObj, null, 2)).toString('base64')}`;
 
@@ -168,6 +193,7 @@ const jsFiles = [
   { name: 'js/home-showcase.js', file: path.join(rootDir, 'js', 'home-showcase.js') },
   { name: 'js/theory.js', file: path.join(rootDir, 'js', 'theory.js') },
   { name: 'js/simulate.js', file: path.join(rootDir, 'js', 'simulate.js') },
+  { name: 'js/haptics.js', file: path.join(rootDir, 'js', 'haptics.js') },
   { name: 'js/data-log.js', file: path.join(rootDir, 'js', 'data-log.js') },
   { name: 'js/compare.js', file: path.join(rootDir, 'js', 'compare.js') },
   { name: 'js/pdf-export.js', file: path.join(rootDir, 'js', 'pdf-export.js') },
@@ -184,7 +210,7 @@ for (const item of jsFiles) {
 }
 
 // Replace external script tags section using a function replacer so $& in JS code is NOT replaced!
-const scriptTagsRegex = /<!-- ════════════════════════════════════════════════════════════════\s*Scripts\s*════════════════════════════════════════════════════════════════ -->\s*<script src="https:\/\/cdnjs\.cloudflare\.com\/ajax\/libs\/jspdf\/2\.5\.1\/jspdf\.umd\.min\.js"><\/script>\s*<script src="js\/gsap\.min\.js[^"]*"><\/script>\s*<script src="js\/ScrollTrigger\.min\.js[^"]*"><\/script>\s*<script src="js\/home-showcase\.js[^"]*"><\/script>\s*<script src="js\/theory\.js[^"]*"><\/script>\s*<script src="js\/simulate\.js[^"]*"><\/script>\s*<script src="js\/data-log\.js[^"]*"><\/script>\s*<script src="js\/compare\.js[^"]*"><\/script>\s*<script src="js\/pdf-export\.js[^"]*"><\/script>\s*<script src="js\/staggered-menu\.bundle\.js[^"]*"><\/script>\s*<script src="js\/get-started-bg\.js[^"]*"><\/script>/i;
+const scriptTagsRegex = /<!-- ════════════════════════════════════════════════════════════════\s*Scripts\s*════════════════════════════════════════════════════════════════ -->[\s\S]*?<script src="js\/get-started-bg\.js[^"]*"><\/script>/i;
 
 if (!scriptTagsRegex.test(html)) {
   console.error("Could not find script tags to replace!");
