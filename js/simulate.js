@@ -353,7 +353,7 @@
       ${ticks}
       <line class="dial-needle" x1="${cx}" y1="${cy}" x2="${needleEnd.x.toFixed(1)}" y2="${needleEnd.y.toFixed(1)}" stroke="var(--accent-amber)" stroke-width="2.5" stroke-linecap="round"/>
       <circle cx="${cx}" cy="${cy}" r="3.5" fill="var(--accent-amber)"/>
-      <text class="dial-label" x="${polar(cx, cy, r * 0.55, clamped / 2 + 3).x.toFixed(1)}" y="${polar(cx, cy, r * 0.55, clamped / 2 + 3).y.toFixed(1)}" text-anchor="middle" font-family="JetBrains Mono" font-size="12" font-weight="700" fill="var(--accent-amber)">${angleLabel}</text>
+      <text class="dial-label" x="${polar(cx, cy, r * 0.55, clamped / 2 + 3).x.toFixed(1)}" y="${polar(cx, cy, r * 0.55, clamped / 2 + 3).y.toFixed(1)}" text-anchor="middle" font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif" font-size="13" font-weight="700" fill="var(--accent-amber)">${angleLabel}</text>
     `;
   }
 
@@ -467,7 +467,7 @@
             <span class="swatch-dot" style="background: ${pStyle.swatch || '#999'};"></span>
           </span>
           <span class="radix-item-title">${mat.name}</span>
-          <span class="radix-item-mu">μ ≈ ${avgMu}</span>
+          <span class="radix-item-mu"><span class="sym">μ</span> ≈ ${avgMu}</span>
         </div>
       `;
 
@@ -603,7 +603,7 @@
       <!-- Slip Alert Indicator -->
       <g id="reposeSlipIndicator" opacity="0">
         <rect x="170" y="44" width="260" height="34" rx="17" fill="rgba(255, 77, 77, 0.14)" stroke="var(--accent-red)" stroke-width="1.2"/>
-        <text id="reposeSlipText" x="300" y="66" text-anchor="middle" fill="var(--accent-red)" font-size="12" font-family="Inter, sans-serif" font-weight="700">⚠ CRITICAL SLIP AT α = 0.0°</text>
+        <text id="reposeSlipText" x="300" y="66" text-anchor="middle" fill="var(--accent-red)" font-size="12" font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif, sans-serif" font-weight="700">⚠ CRITICAL SLIP AT α = 0.0°</text>
       </g>
 
       <!-- Technical Telemetry & Material Pair Indicator in Viewport -->

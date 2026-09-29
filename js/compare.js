@@ -53,7 +53,7 @@
 
       if (deviation < 5) {
         deviationEl.style.color = 'var(--accent-green)';
-        verdictEl.innerHTML = '<span class="status-badge success" style="font-size: 0.85rem;">Excellent agreement — both methods yield consistent μ</span>';
+        verdictEl.innerHTML = '<span class="status-badge success" style="font-size: 0.85rem;">Excellent agreement — both methods yield consistent <span class="sym">μ</span></span>';
       } else if (deviation < 15) {
         deviationEl.style.color = 'var(--accent-amber)';
         verdictEl.innerHTML = '<span class="status-badge warning" style="font-size: 0.85rem;">Moderate deviation — results are reasonable but could be improved</span>';
@@ -152,7 +152,7 @@
     html += `<line x1="${pad.left}" y1="${H - pad.bottom}" x2="${W - pad.right}" y2="${H - pad.bottom}" stroke="var(--diagram-axis)" stroke-width="1"/>`;
 
     // Y-axis label
-    html += `<text x="15" y="${H / 2}" text-anchor="middle" fill="var(--text-dim)" font-size="11" font-family="Inter" transform="rotate(-90, 15, ${H / 2})">Mean μ</text>`;
+    html += `<text x="15" y="${H / 2}" text-anchor="middle" fill="var(--text-dim)" font-size="12" font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif" transform="rotate(-90, 15, ${H / 2})">Mean μ</text>`;
 
     svg.innerHTML = html;
   }

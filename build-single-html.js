@@ -15,9 +15,9 @@ const icon512DataUri = `data:image/png;base64,${icon512Base64}`;
 
 // Create embedded manifest
 const manifestObj = {
-  name: "Coefficient of Friction — Virtual Lab",
-  short_name: "μs Lab",
-  description: "Virtual Mechanics Lab: Coefficient of Friction Simulator",
+  name: "Coefficient of Friction — Virtual Simulation",
+  short_name: "μs Sim",
+  description: "Virtual Mechanics Simulation: Coefficient of Friction Experiment",
   start_url: "#home",
   scope: "./",
   display: "standalone",
@@ -205,7 +205,21 @@ html = html.replace(
   'if ("serviceWorker" in navigator && window.location.protocol.startsWith("http")) {'
 );
 
-// Write ONLY to friction_standalone.html (leave old main files completely untouched)
+// 7. Base64-inline manual screenshots so standalone file displays all manual images self-contained
+const manualDir = path.join(rootDir, 'assets', 'manual');
+if (fs.existsSync(manualDir)) {
+  const manualFiles = fs.readdirSync(manualDir).filter(f => f.endsWith('.png'));
+  for (const file of manualFiles) {
+    const fullPath = path.join(manualDir, file);
+    const b64 = fs.readFileSync(fullPath).toString('base64');
+    const dataUri = `data:image/png;base64,${b64}`;
+    const pattern = new RegExp(`src=["'](?:\\./)?assets/manual/${file}["']`, 'g');
+    html = html.replace(pattern, () => `src="${dataUri}"`);
+  }
+  console.log(`Inlined ${manualFiles.length} manual screenshots into standalone HTML.`);
+}
+
+// Write to friction_standalone.html
 fs.writeFileSync(path.join(rootDir, 'friction_standalone.html'), html, 'utf8');
 console.log('Successfully created friction_standalone.html (Size: ' + html.length + ' bytes)');
 

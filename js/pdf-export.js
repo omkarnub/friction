@@ -97,7 +97,7 @@
 
     doc.setFontSize(8);
     doc.setTextColor(148, 163, 184);
-    doc.text(`Report Generated: ${new Date().toLocaleString()}   |   Virtual Lab Simulator`, margin + 14, 33);
+    doc.text(`Report Generated: ${new Date().toLocaleString()}   |   Virtual Simulation & Experiment`, margin + 14, 33);
 
     y = 56;
 
@@ -362,12 +362,12 @@
       doc.setTextColor(...textMuted);
       doc.setFontSize(7);
       doc.setFont('helvetica', 'normal');
-      doc.text('FrictionLab — Coefficient of Friction Virtual Lab Simulator', margin, footerY);
+      doc.text('FrictionLab — Coefficient of Friction Virtual Simulation', margin, footerY);
       doc.text(`Page ${p} of ${totalPages}`, pageW - margin, footerY, { align: 'right' });
     }
 
     // Save PDF
-    const filename = `friction-lab-${logMethod}-${logMaterial}-${new Date().toISOString().slice(0, 10)}.pdf`;
+    const filename = `friction-sim-${logMethod}-${logMaterial}-${new Date().toISOString().slice(0, 10)}.pdf`;
     doc.save(filename);
   }
 })();

@@ -4,10 +4,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Coefficient of Friction — Virtual Lab Simulator</title>
+  <title>Coefficient of Friction — Virtual Simulation</title>
   <meta name="description"
-    content="Interactive virtual lab simulator for measuring the static coefficient of friction using the Angle of Repose and Friction Plane methods.">
-  <meta name="keywords" content="coefficient of friction, virtual lab, physics simulation, engineering mechanics">
+    content="Interactive virtual simulation for measuring the static coefficient of friction using the Angle of Repose and Friction Plane methods.">
+  <meta name="keywords" content="coefficient of friction, virtual simulation, physics experiment, engineering mechanics">
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📐</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -114,7 +114,7 @@
       </div>
 
       <div class="nav-actions">
-        <button id="pwa-install-btn" class="theme-toggle" style="display:none;" aria-label="Install app">Install App</button>
+        <button id="pwa-install-btn" class="theme-toggle" style="display:none;" aria-label="Install app">INSTALL</button>
         <div class="nav-menu-slot" aria-hidden="true"></div>
       </div>
     </div>
@@ -407,8 +407,8 @@
           <div class="learn-qa-block" data-sr>
             <h3 class="learn-qa-question" data-sr-text>What is the Coefficient of Friction?</h3>
             <p class="learn-qa-answer" data-sr-text>
-              The coefficient of friction (μ) is a dimensionless number that quantifies the resistance between two
-              surfaces in contact. It tells you how "grippy" a surface pair is — a higher μ means more resistance to
+              The coefficient of friction (<span class="sym">μ</span>) is a dimensionless number that quantifies the resistance between two
+              surfaces in contact. It tells you how "grippy" a surface pair is — a higher <span class="sym">μ</span> means more resistance to
               sliding. Steel on steel might be around 0.6, while lubricated surfaces can drop to 0.1. This single number
               governs whether a block stays put on a slope or starts to slide.
             </p>
@@ -419,7 +419,7 @@
             <p class="learn-qa-answer" data-sr-text>
               Engineers rely on friction coefficients to design braking systems, conveyor belts, machine bearings, and
               structural joints. Underestimate friction — parts seize and overheat. Overestimate it — objects slide when
-              they shouldn't. Measuring μ accurately is a foundational skill in applied mechanics, and this experiment
+              they shouldn't. Measuring <span class="sym">μ</span> accurately is a foundational skill in applied mechanics, and this experiment
               teaches you exactly how to do it.
             </p>
           </div>
@@ -554,7 +554,7 @@
                 <p class="learn-qa-answer" data-sr-text>
                   Place a block on a flat inclined plane. Slowly tilt the plane upward. As the angle increases,
                   gravity's pull along the slope grows — but friction holds the block in place. At a critical angle
-                  called the angle of repose (α), the block is at the verge of sliding. At this exact moment, the forces
+                  called the angle of repose (<span class="sym">α</span>), the block is at the verge of sliding. At this exact moment, the forces
                   are perfectly balanced.
                 </p>
               </div>
@@ -565,7 +565,7 @@
                   force. This gives us a beautifully simple result:
                 </p>
                 <div class="learn-method-formula">
-                  <span class="formula">μ = tan α</span>
+                  <span class="formula"><span class="sym">μ</span> = tan <span class="sym">α</span></span>
                 </div>
                 <p class="learn-qa-answer" data-sr-text>
                   No force meters, no pulleys — just measure the angle. The tangent of that angle is your coefficient of
@@ -756,10 +756,10 @@
                   and friction. Balancing all forces along the inclined surface gives us:
                 </p>
                 <div class="learn-method-formula">
-                  <span class="formula">μ = (P − W sin θ) / (W cos θ)</span>
+                  <span class="formula"><span class="sym">μ</span> = (P − W sin <span class="sym">θ</span>) / (W cos <span class="sym">θ</span>)</span>
                 </div>
                 <p class="learn-qa-answer" data-sr-text>
-                  Here, P is the pull force from the hanging weights, W is the block's weight, and θ is the plane's
+                  Here, P is the pull force from the hanging weights, W is the block's weight, and <span class="sym">θ</span> is the plane's
                   angle. By measuring these three values, you compute the exact coefficient of friction.
                 </p>
               </div>
@@ -807,7 +807,7 @@
                 <p class="learn-point-desc" data-sr-text>Every aspect of this simulator is built on rigorous mechanics —
                   force decomposition along inclined planes, static equilibrium conditions, real-time vector resolution,
                   and validated material friction coefficients sourced from standard engineering references. The result
-                  is a virtual lab that mirrors the behaviour of a physical apparatus with scientific fidelity.</p>
+                  is a virtual experiment that mirrors the behaviour of a physical apparatus with scientific fidelity.</p>
               </div>
             </div>
           </div>
@@ -825,10 +825,10 @@
         <div class="lab-breadcrumb">
           <a href="#home" class="breadcrumb-link">⌂ Home</a>
           <span class="breadcrumb-sep">/</span>
-          <span class="breadcrumb-current">Virtual Lab: Experimental Methods</span>
+          <span class="breadcrumb-current">Virtual Experiment: Experimental Methods</span>
         </div>
         <div class="section-badge">📖 Experiment Methods</div>
-        <h2 class="section-title">Two Ways to Measure μ</h2>
+        <h2 class="section-title">Two Ways to Measure <span class="sym">μ</span></h2>
         <p class="section-subtitle">Both methods measure the limiting static coefficient of friction between a block and
           a surface. They should yield similar results for the same material pair.</p>
 
@@ -840,7 +840,7 @@
             <p class="card-desc mb-lg">
               Raise one end of the inclined plane carrying the block (with no external force) until the block just
               begins to slide.
-              The angle at that moment is the <strong>angle of repose</strong>, α.
+              The angle at that moment is the <strong>angle of repose</strong>, <span class="sym">α</span>.
             </p>
 
             <svg class="svg-canvas" viewBox="0 0 400 220" width="100%" style="margin-bottom: 1rem;">
@@ -865,7 +865,7 @@
               </g>
               <!-- Angle arc -->
               <path d="M 130 180 A 50 50 0 0 0 125 157" fill="none" stroke="var(--accent-amber)" stroke-width="1.5" />
-              <text x="138" y="170" fill="var(--accent-amber)" font-size="12" font-family="JetBrains Mono"
+              <text x="138" y="170" fill="var(--accent-amber)" font-size="14" font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif"
                 font-weight="600">α</text>
               <!-- Arrow showing gravity -->
               <g transform="translate(190, 115) rotate(-25)">
@@ -882,7 +882,7 @@
               <rect x="240" y="150" width="130" height="30" rx="6" fill="rgba(255,255,255,0.06)"
                 stroke="rgba(255,255,255,0.12)" stroke-width="1" />
               <text x="305" y="170" text-anchor="middle" fill="var(--accent-amber)" font-size="13"
-                font-family="JetBrains Mono" font-weight="600">μ = tan α</text>
+                font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif" font-weight="600">μ = tan α</text>
             </svg>
 
             <p class="card-desc">
@@ -890,7 +890,7 @@
               friction force.
             </p>
             <div class="mt-lg">
-              <span class="formula">μ = tan α</span>
+              <span class="formula"><span class="sym">μ</span> = tan <span class="sym">α</span></span>
             </div>
             <div class="mt-lg">
               <a href="#simulate" class="btn btn-primary btn-sm"
@@ -942,7 +942,7 @@
                 font-family="Inter">P</text>
               <!-- Angle arc -->
               <path d="M 110 180 A 50 50 0 0 0 106 158" fill="none" stroke="var(--accent-amber)" stroke-width="1.5" />
-              <text x="115" y="170" fill="var(--accent-amber)" font-size="12" font-family="JetBrains Mono"
+              <text x="115" y="170" fill="var(--accent-amber)" font-size="13" font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif"
                 font-weight="600">θ</text>
               <!-- Force arrow P -->
               <line x1="310" y1="168" x2="310" y2="198" stroke="var(--accent-green)" stroke-width="1.5"
@@ -950,8 +950,8 @@
               <!-- Formula label -->
               <rect x="220" y="192" width="170" height="24" rx="6" fill="rgba(255,255,255,0.06)"
                 stroke="rgba(255,255,255,0.12)" stroke-width="1" />
-              <text x="305" y="208" text-anchor="middle" fill="var(--accent-amber)" font-size="11"
-                font-family="JetBrains Mono" font-weight="600">μ = (P−Wsinθ)/(Wcosθ)</text>
+              <text x="305" y="208" text-anchor="middle" fill="var(--accent-amber)" font-size="12"
+                font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif" font-weight="600">μ = (P−Wsinθ)/(Wcosθ)</text>
             </svg>
 
             <p class="card-desc">
@@ -959,7 +959,7 @@
               friction resisting the impending motion.
             </p>
             <div class="mt-lg">
-              <span class="formula">μ = (P − W sin θ) / (W cos θ)</span>
+              <span class="formula"><span class="sym">μ</span> = (P − W sin <span class="sym">θ</span>) / (W cos <span class="sym">θ</span>)</span>
             </div>
             <div class="mt-lg">
               <a href="#simulate" class="btn btn-primary btn-sm"
@@ -976,7 +976,7 @@
         <div class="lab-breadcrumb">
           <a href="#home" class="breadcrumb-link">⌂ Home</a>
           <span class="breadcrumb-sep">/</span>
-          <span class="breadcrumb-current">Virtual Lab: Interactive Simulator</span>
+          <span class="breadcrumb-current">Virtual Simulation: Interactive Simulator</span>
         </div>
         <h2 class="section-title">Run the Experiment</h2>
         <p class="section-subtitle">Select materials, adjust angles and loads, and observe limiting friction behavior in
@@ -1040,7 +1040,7 @@
 
               <div class="slider-container">
                 <div class="slider-header">
-                  <span class="slider-label">Angle (α)</span>
+                  <span class="slider-label">Angle (<span class="sym">α</span>)</span>
                   <span class="slider-value" id="reposeAngleValue">0°</span>
                 </div>
                 <div class="slider-control-row">
@@ -1068,7 +1068,7 @@
 
               <div
                 style="padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md); margin-top: var(--space-md);">
-                <div class="sim-readout-label">Coefficient of Friction (μ)</div>
+                <div class="sim-readout-label">Coefficient of Friction (<span class="sym">μ</span>)</div>
                 <div class="mu-readout" id="reposeMu">0.0000</div>
                 <div id="reposeStatus" class="mt-sm" style="font-size: 0.8rem;"></div>
               </div>
@@ -1156,7 +1156,7 @@
               <!-- Readout bar -->
               <div class="sim-readout-bar">
                 <div class="sim-readout-item">
-                  <div class="sim-readout-label">Angle α</div>
+                  <div class="sim-readout-label">Angle <span class="sym">α</span></div>
                   <div class="sim-readout-value" id="reposeReadoutAngle">0.0°</div>
                 </div>
                 <div class="sim-readout-item">
@@ -1164,11 +1164,11 @@
                   <div class="sim-readout-value" id="reposeReadoutWeight">5.0 N</div>
                 </div>
                 <div class="sim-readout-item">
-                  <div class="sim-readout-label">tan α</div>
+                  <div class="sim-readout-label">tan <span class="sym">α</span></div>
                   <div class="sim-readout-value" id="reposeReadoutTan">0.0000</div>
                 </div>
                 <div class="sim-readout-item">
-                  <div class="sim-readout-label">μ = tan α</div>
+                  <div class="sim-readout-label"><span class="sym">μ</span> = tan <span class="sym">α</span></div>
                   <div class="sim-readout-value" id="reposeReadoutMu" style="color: var(--accent-amber);">0.0000</div>
                 </div>
                 <div class="sim-readout-item">
@@ -1230,7 +1230,7 @@
 
               <div class="slider-container">
                 <div class="slider-header">
-                  <span class="slider-label">Angle (θ)</span>
+                  <span class="slider-label">Angle (<span class="sym">θ</span>)</span>
                   <span class="slider-value" id="frictionAngleValue">0°</span>
                 </div>
                 <div class="slider-control-row">
@@ -1280,7 +1280,7 @@
 
               <div
                 style="padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md); margin-top: var(--space-md);">
-                <div class="sim-readout-label">Coefficient of Friction (μ)</div>
+                <div class="sim-readout-label">Coefficient of Friction (<span class="sym">μ</span>)</div>
                 <div class="mu-readout" id="frictionMu">0.0000</div>
                 <div id="frictionStatus" class="mt-sm" style="font-size: 0.8rem;"></div>
               </div>
@@ -1380,7 +1380,7 @@
                   <div class="sim-readout-value" id="frictionReadoutForce">0.0 N</div>
                 </div>
                 <div class="sim-readout-item">
-                  <div class="sim-readout-label">μ</div>
+                  <div class="sim-readout-label"><span class="sym">μ</span></div>
                   <div class="sim-readout-value" id="frictionReadoutMu" style="color: var(--accent-amber);">0.0000</div>
                 </div>
                 <div class="sim-readout-item">
@@ -1400,7 +1400,7 @@
         <div class="lab-breadcrumb">
           <a href="#home" class="breadcrumb-link">⌂ Home</a>
           <span class="breadcrumb-sep">/</span>
-          <span class="breadcrumb-current">Virtual Lab: Material Reference Values</span>
+          <span class="breadcrumb-current">Virtual Experiment: Material Reference Values</span>
         </div>
         <div class="section-badge">📊 Reference Data</div>
         <h2 class="section-title">Typical Static Friction Coefficients</h2>
@@ -1412,8 +1412,8 @@
             <thead>
               <tr>
                 <th>Material Pair</th>
-                <th>μ (Low)</th>
-                <th>μ (High)</th>
+                <th><span class="sym">μ</span> (Low)</th>
+                <th><span class="sym">μ</span> (High)</th>
                 <th>Midpoint</th>
               </tr>
             </thead>
@@ -1493,11 +1493,11 @@
         <div class="lab-breadcrumb">
           <a href="#home" class="breadcrumb-link">⌂ Home</a>
           <span class="breadcrumb-sep">/</span>
-          <span class="breadcrumb-current">Virtual Lab: Observation Data Log & Report</span>
+          <span class="breadcrumb-current">Virtual Experiment: Observation Data Log & Report</span>
         </div>
         <div class="section-badge">📝 Data Recording</div>
         <h2 class="section-title">Data Log</h2>
-        <p class="section-subtitle">Record your trial readings, calculate per-row μ, and see the mean with % error
+        <p class="section-subtitle">Record your trial readings, calculate per-row <span class="sym">μ</span>, and see the mean with % error
           against reference values.</p>
 
         <div class="log-header">
@@ -1593,7 +1593,7 @@
               <span style="transition-delay:0ms">A</span><span style="transition-delay:30ms">n</span><span
                 style="transition-delay:60ms">g</span><span style="transition-delay:90ms">l</span><span
                 style="transition-delay:120ms">e</span><span style="transition-delay:150ms">&nbsp;</span><span
-                style="transition-delay:180ms">α</span><span style="transition-delay:210ms">&nbsp;</span><span
+                style="transition-delay:180ms" class="sym">α</span><span style="transition-delay:210ms">&nbsp;</span><span
                 style="transition-delay:240ms">(</span><span style="transition-delay:270ms">°</span><span
                 style="transition-delay:300ms">)</span>
             </label>
@@ -1765,7 +1765,7 @@
           </div>
           <div class="log-stat">
             <div class="log-stat-value" id="logMeanMu" style="color: var(--accent-amber);">—</div>
-            <div class="log-stat-label">Mean μ</div>
+            <div class="log-stat-label">Mean <span class="sym">μ</span></div>
           </div>
           <div class="log-stat">
             <div class="log-stat-value" id="logRefRange" style="color: var(--accent-cyan);">—</div>
@@ -1783,7 +1783,7 @@
 
         <!-- Chart -->
         <div class="chart-container" id="logChart" style="display: none;">
-          <div class="chart-title">μ per Trial</div>
+          <div class="chart-title"><span class="sym">μ</span> per Trial</div>
           <svg id="logChartSvg" class="svg-canvas" viewBox="0 0 700 250" width="100%"
             style="border: none; background: transparent;"></svg>
         </div>
@@ -1796,7 +1796,7 @@
         <div class="lab-breadcrumb">
           <a href="#home" class="breadcrumb-link">⌂ Home</a>
           <span class="breadcrumb-sep">/</span>
-          <span class="breadcrumb-current">Virtual Lab: Engineering Theory</span>
+          <span class="breadcrumb-current">Virtual Simulation: Engineering Theory</span>
         </div>
         <div class="section-badge">📚 Theory & Definitions</div>
         <h2 class="section-title">Understanding Friction</h2>
@@ -1814,12 +1814,12 @@
         <div class="lab-breadcrumb">
           <a href="#home" class="breadcrumb-link">⌂ Home</a>
           <span class="breadcrumb-sep">/</span>
-          <span class="breadcrumb-current">Virtual Lab: Method Comparison</span>
+          <span class="breadcrumb-current">Virtual Experiment: Method Comparison</span>
         </div>
         <div class="section-badge">⚖ Cross-Check</div>
         <h2 class="section-title">Method Comparison</h2>
-        <p class="section-subtitle">Compare mean μ from both methods for the same material pair. Both should yield
-          similar values — μ is a property of the surface pair, not the method.</p>
+        <p class="section-subtitle">Compare mean <span class="sym">μ</span> from both methods for the same material pair. Both should yield
+          similar values — <span class="sym">μ</span> is a property of the surface pair, not the method.</p>
 
         <div class="form-group" style="max-width: 300px;">
           <label class="form-label" for="compareMaterial">Material Pair</label>
@@ -1840,9 +1840,9 @@
           <div class="card" id="compareMethodA">
             <div class="card-icon blue">📐</div>
             <h3 class="card-title">Angle of Repose</h3>
-            <p class="card-desc mb-lg">μ = tan α</p>
+            <p class="card-desc mb-lg"><span class="sym">μ</span> = tan <span class="sym">α</span></p>
             <div style="padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md);">
-              <div class="sim-readout-label">Mean μ</div>
+              <div class="sim-readout-label">Mean <span class="sym">μ</span></div>
               <div class="mu-readout" id="compareMuA" style="font-size: 2rem;">—</div>
               <div class="mt-sm" style="font-size: 0.8rem; color: var(--text-dim);" id="compareTrialsA">0 trials</div>
             </div>
@@ -1853,9 +1853,9 @@
           <div class="card" id="compareMethodB">
             <div class="card-icon amber">⚖</div>
             <h3 class="card-title">Friction Plane</h3>
-            <p class="card-desc mb-lg">μ = (P − W sin θ) / (W cos θ)</p>
+            <p class="card-desc mb-lg"><span class="sym">μ</span> = (P − W sin <span class="sym">θ</span>) / (W cos <span class="sym">θ</span>)</p>
             <div style="padding: 1rem; background: var(--bg-surface); border-radius: var(--radius-md);">
-              <div class="sim-readout-label">Mean μ</div>
+              <div class="sim-readout-label">Mean <span class="sym">μ</span></div>
               <div class="mu-readout" id="compareMuB" style="font-size: 2rem;">—</div>
               <div class="mt-sm" style="font-size: 0.8rem; color: var(--text-dim);" id="compareTrialsB">0 trials</div>
             </div>
@@ -1878,94 +1878,452 @@
       </div>
     </section>
 
-    <!-- ─── OUR TEAM MEMBERS ─── -->
+    <!-- ─── USER MANUAL & SIMULATION GUIDE ─── -->
+    <section class="page-section" id="page-how-to-use">
+      <div class="container">
+        <div class="lab-breadcrumb">
+          <a href="#home" class="breadcrumb-link">⌂ Home</a>
+          <span class="breadcrumb-sep">/</span>
+          <span class="breadcrumb-current">Virtual Simulation: User Manual &amp; Operating Guide</span>
+        </div>
+
+        <div class="team-header">
+          <div class="section-badge">📖 Operating Guide</div>
+          <h2 class="section-title">HOW TO USE THE SIMULATION</h2>
+          <p class="section-subtitle team-subtitle">Comprehensive step-by-step guidance for operating the apparatus, logging observations, and evaluating friction physics</p>
+        </div>
+
+        <!-- ── Device Variant View Switcher ── -->
+        <div class="manual-view-toggle-bar">
+          <div class="manual-view-toggle" id="manualViewToggle" role="tablist" aria-label="Manual View Variant">
+            <button type="button" class="manual-toggle-btn active" id="manualBtnDesktop" data-target="desktop" role="tab" aria-selected="true">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+              <span>Desktop Guide</span>
+            </button>
+            <button type="button" class="manual-toggle-btn" id="manualBtnMobile" data-target="mobile" role="tab" aria-selected="false">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="3"/><line x1="11" y1="18" x2="13" y2="18"/></svg>
+              <span>Mobile Guide</span>
+            </button>
+          </div>
+          <div class="manual-device-note" id="manualDeviceNote">Showing Desktop manual &amp; interface walkthrough</div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             DESKTOP GUIDE VARIANT
+             ══════════════════════════════════════════════════════════════ -->
+        <div class="manual-content-view manual-view-desktop active" id="manualViewDesktop">
+
+          <!-- Step 1: Navigating the Modules -->
+          <div class="manual-step-card">
+            <div class="manual-step-header">
+              <div class="manual-step-num">01</div>
+              <div class="manual-step-title-wrap">
+                <h3 class="manual-step-title">Navigating the Simulation Modules</h3>
+                <p class="manual-step-tagline">Accessing the interactive apparatus, experimental theory, and observation data log</p>
+              </div>
+            </div>
+            <div class="manual-step-body">
+              <div class="manual-instructions">
+                <p>The virtual simulation is structured into modular sections designed to replicate a complete physical engineering mechanics laboratory session:</p>
+                <ul>
+                  <li><strong>Top Navigation Ribbon:</strong> Quick access to <strong>Home</strong> (interactive overview &amp; physics showcase), <strong>Simulate</strong> (real-time virtual apparatus), and <strong>Data Log</strong> (measurement table &amp; report generator).</li>
+                  <li><strong>Staggered Menu (Right Icon):</strong> Click the hamburger toggle at the top right to access all sections: <em>How to Use</em>, <em>Methods</em>, <em>Reference Data</em>, <em>Theory</em>, <em>Method Comparison</em>, and <em>Contributors</em>.</li>
+                  <li><strong>Dark &amp; Light Theme:</strong> Toggle between the sleek obsidian dark workspace and high-contrast light mode using the theme switch on the left of the navigation bar.</li>
+                </ul>
+                <div class="manual-callout">
+                  <strong>Desktop Shortcut:</strong> You can also navigate directly using browser hash URLs like <code>#simulate</code>, <code>#log</code>, or <code>#how-to-use</code>.
+                </div>
+              </div>
+              <figure class="manual-figure">
+                <div class="manual-img-wrap">
+                  <img src="assets/manual/desktop_methods.png" alt="Desktop Methods and Navigation Overview" class="manual-img" loading="lazy">
+                </div>
+                <figcaption class="manual-caption">Figure 1.1: Experimental methods and lab module overview on desktop.</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <!-- Step 2: Operating Angle of Repose Method -->
+          <div class="manual-step-card">
+            <div class="manual-step-header">
+              <div class="manual-step-num">02</div>
+              <div class="manual-step-title-wrap">
+                <h3 class="manual-step-title">Operating Method A: Angle of Repose</h3>
+                <p class="manual-step-tagline">Measuring limiting static friction by gradually tilting the plane until sliding begins</p>
+              </div>
+            </div>
+            <div class="manual-step-body">
+              <div class="manual-instructions">
+                <p>In this method, the limiting angle $\theta_s$ is determined where gravity overcomes limiting static friction without any external pull cord:</p>
+                <ul>
+                  <li><strong>Select Material Pair:</strong> Choose from standard engineering pairs (e.g. <em>Wood on Wood</em>, <em>Wood on Steel</em>, <em>Glass on Glass</em>, <em>Rubber on Concrete</em>) using the dropdown.</li>
+                  <li><strong>Adjust Block Weight ($W$):</strong> Set the normal load from 1.0 N to 10.0 N. Observe that while normal force $N = W \cos\theta$ increases with weight, the critical slip angle remains invariant.</li>
+                  <li><strong>Tilt the Incline Plane ($\theta$):</strong> Drag the angle slider or click the precision <code>+</code> / <code>-</code> stepper buttons (0.5° increments) to tilt the plane.</li>
+                  <li><strong>Analyze Force Vectors:</strong> Observe the dynamic free-body diagram: normal force $N$ (perpendicular to plane), parallel weight component $W \sin\theta$ (driving force), and friction vector $f$ (resisting motion).</li>
+                  <li><strong>Detect Impending Motion:</strong> Once $\theta$ reaches the repose angle ($\tan\theta = \mu_s$), the block breaks equilibrium and accelerates down. The digital readout displays the exact measured coefficient $\mu = \tan\theta$.</li>
+                  <li><strong>Record Trial:</strong> Click <button class="btn btn-primary btn-sm" style="pointer-events:none; padding: 2px 8px; font-size:0.75rem;">Record Observation</button> to log the reading into your trial table.</li>
+                </ul>
+              </div>
+              <figure class="manual-figure">
+                <div class="manual-img-wrap">
+                  <img src="assets/manual/desktop_repose.png" alt="Desktop Angle of Repose Apparatus Interface" class="manual-img" loading="lazy">
+                </div>
+                <figcaption class="manual-caption">Figure 1.2: Angle of Repose apparatus with real-time vector breakdown and digital readout.</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <!-- Step 3: Operating Friction Plane Method -->
+          <div class="manual-step-card">
+            <div class="manual-step-header">
+              <div class="manual-step-num">03</div>
+              <div class="manual-step-title-wrap">
+                <h3 class="manual-step-title">Operating Method B: Friction Plane with Pulley &amp; Pan</h3>
+                <p class="manual-step-tagline">Measuring friction by applying a horizontal or inclined pulling effort via cord and hanging pan</p>
+              </div>
+            </div>
+            <div class="manual-step-body">
+              <div class="manual-instructions">
+                <p>Switch to the <strong>Friction Plane</strong> tab to operate the classical belt/pulley mechanical bench apparatus:</p>
+                <ul>
+                  <li><strong>Set Incline Angle ($\theta$):</strong> Set to 0° for a standard horizontal bench, or incline the bed to any angle up to 60°.</li>
+                  <li><strong>Set Block Weight ($W$):</strong> Choose the test mass resting on the bench.</li>
+                  <li><strong>Add Pan Effort ($P$):</strong> Gradually load weight into the hanging pan attached to the block through the frictionless pulley.</li>
+                  <li><strong>Use Quick-Add Weights:</strong> Click the <code>+5g</code>, <code>+10g</code>, <code>+20g</code>, or <code>+50g</code> buttons to rapidly load standard lab slotted weights into the pan.</li>
+                  <li><strong>Slip Condition &amp; Calculation:</strong> When $P \ge W \sin\theta + \mu_s W \cos\theta$, limiting equilibrium is reached. The formula chip evaluates:
+                    <div style="font-family: var(--font-mono); font-size: 0.88rem; margin: 0.5rem 0; padding: 6px 12px; background: rgba(255,255,255,0.05); border-radius: 4px;">
+                      $\mu = \frac{P - W \sin\theta}{W \cos\theta}$ (or $\mu = \frac{P}{W}$ when $\theta = 0^\circ$)
+                    </div>
+                  </li>
+                  <li><strong>Log Reading:</strong> Click <strong>Record Observation</strong> to send the trial parameters into the Data Log.</li>
+                </ul>
+              </div>
+              <figure class="manual-figure">
+                <div class="manual-img-wrap">
+                  <img src="assets/manual/desktop_friction_plane.png" alt="Desktop Friction Plane with Pulley and Pan" class="manual-img" loading="lazy">
+                </div>
+                <figcaption class="manual-caption">Figure 1.3: Friction Plane apparatus with cord, pulley, pan loading buttons, and live readout.</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <!-- Step 4: Data Log, Error Analysis & PDF Export -->
+          <div class="manual-step-card">
+            <div class="manual-step-header">
+              <div class="manual-step-num">04</div>
+              <div class="manual-step-title-wrap">
+                <h3 class="manual-step-title">Observation Data Log, Verification &amp; PDF Report</h3>
+                <p class="manual-step-tagline">Analyzing statistical deviation, comparing with standard handbook values, and generating lab reports</p>
+              </div>
+            </div>
+            <div class="manual-step-body">
+              <div class="manual-instructions">
+                <p>Navigate to the <strong>Data Log</strong> tab to review recorded trials and conduct rigorous scientific validation:</p>
+                <ul>
+                  <li><strong>Interactive Trial Table:</strong> Displays each recorded observation with Trial #, Method, Material Pair, Angle ($\theta$), Weight ($W$), Effort ($P$), and Calculated $\mu$.</li>
+                  <li><strong>Filter by Method or Surface:</strong> Use the dropdowns at the top of the Data Log to isolate specific trials.</li>
+                  <li><strong>Statistical Evaluation:</strong>
+                    <ul>
+                      <li><strong>Mean $\mu$:</strong> Computes the arithmetic average of logged trials.</li>
+                      <li><strong>Reference Range:</strong> Displays validated handbook values from engineering literature.</li>
+                      <li><strong>Percentage Error:</strong> Automatically calculates $\% \text{Error} = \frac{|\mu_{\text{mean}} - \mu_{\text{ref}}|}{\mu_{\text{ref}}} \times 100\%$.</li>
+                      <li><strong>Range Check Badge:</strong> Confirms whether results fall within standard physical tolerance.</li>
+                    </ul>
+                  </li>
+                  <li><strong>Export Formal PDF Report:</strong> Click <strong>Export PDF</strong> to generate a complete, formatted engineering lab report with student metadata, formulas, observations, and statistics.</li>
+                  <li><strong>Export CSV:</strong> Download comma-separated data for spreadsheet plotting in Excel, MATLAB, or Python.</li>
+                </ul>
+              </div>
+              <figure class="manual-figure">
+                <div class="manual-img-wrap">
+                  <img src="assets/manual/desktop_datalog.png" alt="Desktop Data Log and Report Export Interface" class="manual-img" loading="lazy">
+                </div>
+                <figcaption class="manual-caption">Figure 1.4: Observation Data Log with statistical analysis, error check, and PDF/CSV exporter.</figcaption>
+              </figure>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════════
+             MOBILE GUIDE VARIANT
+             ══════════════════════════════════════════════════════════════ -->
+        <div class="manual-content-view manual-view-mobile" id="manualViewMobile">
+
+          <!-- Mobile Step 1: Touch Navigation -->
+          <div class="manual-step-card">
+            <div class="manual-step-header">
+              <div class="manual-step-num">01</div>
+              <div class="manual-step-title-wrap">
+                <h3 class="manual-step-title">Mobile Touch Navigation &amp; Drawer Menu</h3>
+                <p class="manual-step-tagline">Accessing all modules smoothly on smartphones and tablet touchscreens</p>
+              </div>
+            </div>
+            <div class="manual-step-body">
+              <div class="manual-instructions">
+                <p>The mobile experience is specially optimized for one-thumb operation:</p>
+                <ul>
+                  <li><strong>Staggered Drawer Menu:</strong> Tap the menu button at top right to slide open the full navigation drawer.</li>
+                  <li><strong>Sticky Navigation Header:</strong> Quick navigation tabs remain accessible without taking away simulation canvas space.</li>
+                  <li><strong>Light &amp; Dark Theme:</strong> Tap the theme toggle on the navigation bar for high sunlight visibility or battery-saving dark mode.</li>
+                </ul>
+              </div>
+              <figure class="manual-figure">
+                <div class="manual-img-wrap">
+                  <img src="assets/manual/mobile_methods.png" alt="Mobile Navigation and Methods View" class="manual-img" loading="lazy">
+                </div>
+                <figcaption class="manual-caption">Figure 2.1: Mobile responsive navigation and experimental method selection.</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <!-- Mobile Step 2: Repose Method on Mobile -->
+          <div class="manual-step-card">
+            <div class="manual-step-header">
+              <div class="manual-step-num">02</div>
+              <div class="manual-step-title-wrap">
+                <h3 class="manual-step-title">Operating Angle of Repose on Mobile</h3>
+                <p class="manual-step-tagline">Touch-optimized angle tilting, responsive apparatus view, and one-tap logging</p>
+              </div>
+            </div>
+            <div class="manual-step-body">
+              <div class="manual-instructions">
+                <p>On phone screens, controls and apparatus are arranged in a natural vertical scroll layout:</p>
+                <ul>
+                  <li><strong>Apparatus Canvas:</strong> Scaled automatically to phone viewports with crisp SVG vector rendering.</li>
+                  <li><strong>Touch Sliders &amp; Steppers:</strong> Drag the oversized slider thumbs or tap the large <code>+</code> / <code>-</code> stepper buttons for precise 0.5° increments without finger slips.</li>
+                  <li><strong>Compact Digital Readout:</strong> Shows Angle $\theta$, Weight $W$, and calculated $\mu = \tan\theta$ with high-contrast text.</li>
+                  <li><strong>One-Tap Log:</strong> Tap <strong>Record Observation</strong> to immediately save readings into your trial log.</li>
+                </ul>
+              </div>
+              <figure class="manual-figure">
+                <div class="manual-img-wrap">
+                  <img src="assets/manual/mobile_repose.png" alt="Mobile Angle of Repose Interface" class="manual-img" loading="lazy">
+                </div>
+                <figcaption class="manual-caption">Figure 2.2: Mobile Angle of Repose apparatus with stacked touch controls and readout.</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <!-- Mobile Step 3: Friction Plane on Mobile -->
+          <div class="manual-step-card">
+            <div class="manual-step-header">
+              <div class="manual-step-num">03</div>
+              <div class="manual-step-title-wrap">
+                <h3 class="manual-step-title">Operating Friction Plane on Mobile</h3>
+                <p class="manual-step-tagline">Thumb-friendly quick-weight addition and hanging pan simulation</p>
+              </div>
+            </div>
+            <div class="manual-step-body">
+              <div class="manual-instructions">
+                <p>Designed for fast experimentation without typing:</p>
+                <ul>
+                  <li><strong>Quick Weight Buttons:</strong> Tap <code>+5g</code>, <code>+10g</code>, <code>+20g</code>, or <code>+50g</code> chips to instantly load mass into the hanging pan.</li>
+                  <li><strong>Cord &amp; Pulley Visuals:</strong> Real-time animation shows the cord tautening and the block overcoming limiting static friction.</li>
+                  <li><strong>Real-Time Formula:</strong> Evaluates $\mu = \frac{P - W \sin\theta}{W \cos\theta}$ in real time as weights change.</li>
+                </ul>
+              </div>
+              <figure class="manual-figure">
+                <div class="manual-img-wrap">
+                  <img src="assets/manual/mobile_friction_plane.png" alt="Mobile Friction Plane Interface" class="manual-img" loading="lazy">
+                </div>
+                <figcaption class="manual-caption">Figure 2.3: Mobile Friction Plane controls with quick-add weight buttons.</figcaption>
+              </figure>
+            </div>
+          </div>
+
+          <!-- Mobile Step 4: Mobile Data Log & Export -->
+          <div class="manual-step-card">
+            <div class="manual-step-header">
+              <div class="manual-step-num">04</div>
+              <div class="manual-step-title-wrap">
+                <h3 class="manual-step-title">Mobile Data Log &amp; Instant Report Generation</h3>
+                <p class="manual-step-tagline">Viewing trial records on phone screens and exporting PDF reports</p>
+              </div>
+            </div>
+            <div class="manual-step-body">
+              <div class="manual-instructions">
+                <p>Conduct full lab data recording and reporting directly from your mobile device:</p>
+                <ul>
+                  <li><strong>Card &amp; Scrollable Table View:</strong> Easily swipe horizontally across table columns to view all trial values.</li>
+                  <li><strong>Instant Statistics:</strong> View Mean $\mu$, Reference Value, and % Error on mobile summary cards.</li>
+                  <li><strong>Mobile PDF Download:</strong> Tap <strong>Export PDF</strong> to generate and download the laboratory report directly to your device storage (Files app or Downloads).</li>
+                </ul>
+              </div>
+              <figure class="manual-figure">
+                <div class="manual-img-wrap">
+                  <img src="assets/manual/mobile_datalog.png" alt="Mobile Data Log Interface" class="manual-img" loading="lazy">
+                </div>
+                <figcaption class="manual-caption">Figure 2.4: Mobile Data Log with responsive table and export buttons.</figcaption>
+              </figure>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ─── OUR TEAM MEMBERS & MENTORSHIP ─── -->
     <section class="page-section" id="page-contributors">
       <div class="container">
         <div class="lab-breadcrumb">
           <a href="#home" class="breadcrumb-link">⌂ Home</a>
           <span class="breadcrumb-sep">/</span>
-          <span class="breadcrumb-current">Virtual Lab: Project Contributors</span>
+          <span class="breadcrumb-current">Virtual Simulation: Project Contributors &amp; Mentorship</span>
         </div>
         <div class="team-header">
-          <h2 class="section-title">OUR TEAM MEMBERS</h2>
+          <h2 class="section-title">PROJECT CONTRIBUTORS &amp; MENTORSHIP</h2>
+          <p class="section-subtitle team-subtitle">Engineering Mechanics Virtual Simulation • Academic Year 2026–27</p>
         </div>
 
-        <div class="team-grid">
-          <!-- Omkar Singh -->
-          <div class="team-card">
-            <h3 class="team-member-name">Omkar Singh</h3>
-            <div class="team-field">
-              <span class="team-field-label">Roll Number:</span>
-              <span class="team-field-val">31</span>
-            </div>
-            <div class="team-field">
-              <span class="team-field-label">Branch:</span>
-              <span class="team-field-val">Information Technology</span>
-            </div>
-          </div>
-
-          <!-- Mughda Jagtap -->
-          <div class="team-card">
-            <h3 class="team-member-name">Mughda Jagtap</h3>
-            <div class="team-field">
-              <span class="team-field-label">Roll Number:</span>
-              <span class="team-field-val">09</span>
-            </div>
-            <div class="team-field">
-              <span class="team-field-label">Branch:</span>
-              <span class="team-field-val">Information Technology</span>
+        <!-- ── Guiding Faculty Section (Distinct & Separated) ── -->
+        <div class="faculty-section">
+          <div class="team-group-label">Project Guidance &amp; Mentorship</div>
+          <div class="faculty-card-wrapper">
+            <div class="team-card faculty-card">
+              <div class="team-card-header">
+                <h3 class="team-member-name">Mr. Avinash Chavan</h3>
+                <span class="team-role-tag">Guiding Faculty</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Role:</span>
+                <span class="team-field-val">Project Mentor &amp; Guide</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Department:</span>
+                <span class="team-field-val">Engineering Mechanics</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Academic Year:</span>
+                <span class="team-field-val">2026–27</span>
+              </div>
             </div>
           </div>
+        </div>
 
-          <!-- Pranav Kotkar -->
-          <div class="team-card">
-            <h3 class="team-member-name">Pranav Kotkar</h3>
-            <div class="team-field">
-              <span class="team-field-label">Roll Number:</span>
-              <span class="team-field-val">11</span>
+        <!-- ── Student Development & Contributor Team ── -->
+        <div class="student-team-section">
+          <div class="team-group-label">Development &amp; Contributor Team</div>
+          <div class="team-grid">
+            <!-- Simulation Developer: Omkar Singh (Monochrome Highlight) -->
+            <div class="team-card developer-highlight">
+              <div class="team-card-header">
+                <h3 class="team-member-name">Omkar Singh</h3>
+                <span class="team-badge-dev">Developer</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Roll Number:</span>
+                <span class="team-field-val">31</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Branch:</span>
+                <span class="team-field-val">Information Technology</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Academic Year:</span>
+                <span class="team-field-val">2026–27</span>
+              </div>
             </div>
-            <div class="team-field">
-              <span class="team-field-label">Branch:</span>
-              <span class="team-field-val">Mechanical Engineering</span>
-            </div>
-          </div>
 
-          <!-- Aayushi Mhaskar -->
-          <div class="team-card">
-            <h3 class="team-member-name">Aayushi Mhaskar</h3>
-            <div class="team-field">
-              <span class="team-field-label">Roll Number:</span>
-              <span class="team-field-val">15</span>
+            <!-- Mughda Jagtap -->
+            <div class="team-card">
+              <div class="team-card-header">
+                <h3 class="team-member-name">Mughda Jagtap</h3>
+                <span class="team-role-tag">Contributor</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Roll Number:</span>
+                <span class="team-field-val">09</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Branch:</span>
+                <span class="team-field-val">Information Technology</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Academic Year:</span>
+                <span class="team-field-val">2026–27</span>
+              </div>
             </div>
-            <div class="team-field">
-              <span class="team-field-label">Branch:</span>
-              <span class="team-field-val">Electronics and Computer Science</span>
-            </div>
-          </div>
 
-          <!-- Piyush Gupta -->
-          <div class="team-card">
-            <h3 class="team-member-name">Piyush Gupta</h3>
-            <div class="team-field">
-              <span class="team-field-label">Roll Number:</span>
-              <span class="team-field-val">07</span>
+            <!-- Pranav Kotkar -->
+            <div class="team-card">
+              <div class="team-card-header">
+                <h3 class="team-member-name">Pranav Kotkar</h3>
+                <span class="team-role-tag">Contributor</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Roll Number:</span>
+                <span class="team-field-val">11</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Branch:</span>
+                <span class="team-field-val">Mechanical Engineering</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Academic Year:</span>
+                <span class="team-field-val">2026–27</span>
+              </div>
             </div>
-            <div class="team-field">
-              <span class="team-field-label">Branch:</span>
-              <span class="team-field-val">Electronics and Computer Science</span>
-            </div>
-          </div>
 
-          <!-- Harshit Sankhe -->
-          <div class="team-card">
-            <h3 class="team-member-name">Harshit Sankhe</h3>
-            <div class="team-field">
-              <span class="team-field-label">Roll Number:</span>
-              <span class="team-field-val">28</span>
+            <!-- Aayushi Mhaskar -->
+            <div class="team-card">
+              <div class="team-card-header">
+                <h3 class="team-member-name">Aayushi Mhaskar</h3>
+                <span class="team-role-tag">Contributor</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Roll Number:</span>
+                <span class="team-field-val">15</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Branch:</span>
+                <span class="team-field-val">Electronics and Computer Science</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Academic Year:</span>
+                <span class="team-field-val">2026–27</span>
+              </div>
             </div>
-            <div class="team-field">
-              <span class="team-field-label">Branch:</span>
-              <span class="team-field-val">Electronics &amp; Computer Science</span>
+
+            <!-- Piyush Gupta -->
+            <div class="team-card">
+              <div class="team-card-header">
+                <h3 class="team-member-name">Piyush Gupta</h3>
+                <span class="team-role-tag">Contributor</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Roll Number:</span>
+                <span class="team-field-val">07</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Branch:</span>
+                <span class="team-field-val">Electronics and Computer Science</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Academic Year:</span>
+                <span class="team-field-val">2026–27</span>
+              </div>
+            </div>
+
+            <!-- Harshit Sankhe -->
+            <div class="team-card">
+              <div class="team-card-header">
+                <h3 class="team-member-name">Harshit Sankhe</h3>
+                <span class="team-role-tag">Contributor</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Roll Number:</span>
+                <span class="team-field-val">28</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Branch:</span>
+                <span class="team-field-val">Electronics &amp; Computer Science</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Academic Year:</span>
+                <span class="team-field-val">2026–27</span>
+              </div>
             </div>
           </div>
         </div>
@@ -2163,6 +2521,7 @@
         if (!page || page === '') page = 'home';
         if (page === 'data-log') page = 'log';
         if (page === 'team' || page === 'members') page = 'contributors';
+        if (page === 'manual' || page === 'guide' || page === 'help') page = 'how-to-use';
 
         // Hide all sections
         document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
@@ -2229,10 +2588,13 @@
 
       window.addEventListener('hashchange', handleHash);
 
-      // On first load: keep the splash screen up; the app content underneath
-      // is still routed so it's ready the instant "Get Started" is clicked.
+      // On first load: keep splash up only if root #home or no hash
       window.addEventListener('load', () => {
-        document.body.classList.add('pre-launch');
+        if (window.location.hash && window.location.hash !== '#home' && window.location.hash !== '#') {
+          document.body.classList.remove('pre-launch');
+        } else {
+          document.body.classList.add('pre-launch');
+        }
         handleHash();
         requestAnimationFrame(updateNavUnderline);
       });
@@ -2513,6 +2875,88 @@
 
       if (isIos && !isInStandaloneMode && installBtn) {
         installBtn.style.display = "inline-flex";
+      }
+    })();
+
+    // ── Math Symbol Guardian ──
+    // Ensures alpha, mu, theta, phi always retain their authentic scientific appearance
+    (function () {
+      function preserveSymbols(container = document.body) {
+        if (!container) return;
+        const targets = container.querySelectorAll('.slider-label, .sim-readout-label, .log-stat-label, th, .card-title, .section-title, .chart-title, .formula, .btn, .card-desc');
+        targets.forEach(el => {
+          if (el.querySelector('.sym')) return;
+          if (/[αμθφ]/.test(el.innerHTML)) {
+            el.innerHTML = el.innerHTML.replace(/(?![^<]*>)([αμθφ])/g, '<span class="sym">$1</span>');
+          }
+        });
+      }
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => preserveSymbols());
+      } else {
+        preserveSymbols();
+      }
+      window.preserveSymbols = preserveSymbols;
+    })();
+
+    // ── Interactive User Manual Variant Switcher (Desktop & Mobile) ──
+    (function () {
+      function initManualView() {
+        const btnDesktop = document.getElementById('manualBtnDesktop');
+        const btnMobile = document.getElementById('manualBtnMobile');
+        const viewDesktop = document.getElementById('manualViewDesktop');
+        const viewMobile = document.getElementById('manualViewMobile');
+        const note = document.getElementById('manualDeviceNote');
+        if (!btnDesktop || !btnMobile || !viewDesktop || !viewMobile) return;
+
+        function setManualView(mode) {
+          const isMobile = mode === 'mobile';
+          btnDesktop.classList.toggle('active', !isMobile);
+          btnDesktop.setAttribute('aria-selected', !isMobile ? 'true' : 'false');
+          btnMobile.classList.toggle('active', isMobile);
+          btnMobile.setAttribute('aria-selected', isMobile ? 'true' : 'false');
+
+          viewDesktop.classList.toggle('active', !isMobile);
+          viewMobile.classList.toggle('active', isMobile);
+
+          if (note) {
+            note.textContent = isMobile
+              ? 'Showing Mobile manual & interface walkthrough'
+              : 'Showing Desktop manual & interface walkthrough';
+          }
+        }
+
+        btnDesktop.addEventListener('click', () => {
+          btnDesktop.dataset.userLocked = 'true';
+          setManualView('desktop');
+        });
+        btnMobile.addEventListener('click', () => {
+          btnDesktop.dataset.userLocked = 'true';
+          setManualView('mobile');
+        });
+
+        // Auto-detect based on screen width
+        if (window.innerWidth <= 768) {
+          setManualView('mobile');
+        } else {
+          setManualView('desktop');
+        }
+
+        window.addEventListener('resize', () => {
+          if (!btnDesktop.dataset.userLocked) {
+            if (window.innerWidth <= 768 && !btnMobile.classList.contains('active')) {
+              setManualView('mobile');
+            } else if (window.innerWidth > 768 && !btnDesktop.classList.contains('active')) {
+              setManualView('desktop');
+            }
+          }
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initManualView);
+      } else {
+        initManualView();
       }
     })();
   </script>

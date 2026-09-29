@@ -540,9 +540,9 @@
       tableHead.innerHTML = `
         <tr>
           <th>#</th>
-          <th>Angle α (°)</th>
+          <th>Angle <span class="sym">α</span> (°)</th>
           <th>Weight W (N)</th>
-          <th>μ = tan α</th>
+          <th><span class="sym">μ</span> = tan <span class="sym">α</span></th>
           <th>Status</th>
           <th></th>
         </tr>`;
@@ -550,10 +550,10 @@
       tableHead.innerHTML = `
         <tr>
           <th>#</th>
-          <th>Angle θ (°)</th>
+          <th>Angle <span class="sym">θ</span> (°)</th>
           <th>Weight W (N)</th>
           <th>Pull P (N)</th>
-          <th>μ</th>
+          <th><span class="sym">μ</span></th>
           <th>Status</th>
           <th></th>
         </tr>`;
@@ -749,7 +749,7 @@
 
     // Axis labels
     html += `<text x="${W / 2}" y="${H - 5}" text-anchor="middle" fill="var(--text-dim)" font-size="11" font-family="Inter">Trial #</text>`;
-    html += `<text x="15" y="${H / 2}" text-anchor="middle" fill="var(--text-dim)" font-size="11" font-family="Inter" transform="rotate(-90, 15, ${H / 2})">μ</text>`;
+    html += `<text x="15" y="${H / 2}" text-anchor="middle" fill="var(--text-dim)" font-size="12" font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif" transform="rotate(-90, 15, ${H / 2})">μ</text>`;
 
     svg.innerHTML = html;
   }
