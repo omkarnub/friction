@@ -617,6 +617,203 @@
 
 
   /* ================================================================
+  /* ================================================================
+     PART 3 — Exact Signature Component Animation (Framer-Motion Replica in GSAP)
+     ================================================================ */
+  let signatureTimeline = null;
+  let signatureObserver = null;
+  let footerScrollListenerAttached = false;
+
+  function initFooterSignature() {
+    const footer = document.getElementById('homeFooter');
+    if (!footer) return;
+
+    const svg = document.getElementById('signatureSvg');
+    if (!svg) return;
+
+    const maskPaths = Array.from(svg.querySelectorAll('.sig-mask-path'));
+    const strokePaths = Array.from(svg.querySelectorAll('.sig-stroke-path'));
+    if (!maskPaths.length || !strokePaths.length) return;
+
+    const duration = 1.5;
+    const charDelay = 0.2;
+    const baseDelay = 0;
+
+    // Build the exact Framer-Motion animation in GSAP:
+    // variants: { hidden: { pathLength: 0, opacity: 0 }, visible: { pathLength: 1, opacity: 1 } }
+    // pathLength transition: delay + i * 0.2, duration: 1.5, ease: "easeInOut"
+    // opacity transition: delay + i * 0.2 + 0.01, duration: 0.01
+    function resetToHidden() {
+      maskPaths.forEach((maskP, i) => {
+        const strokeP = strokePaths[i];
+        let len = 300;
+        try {
+          len = Math.ceil(maskP.getTotalLength() || 300);
+        } catch (e) {
+          len = 300;
+        }
+        gsap.set(maskP, { strokeDasharray: len, strokeDashoffset: len, opacity: 0 });
+        if (strokeP) {
+          gsap.set(strokeP, { strokeDasharray: len, strokeDashoffset: len, opacity: 0 });
+        }
+      });
+    }
+
+    function buildSignatureTimeline() {
+      if (signatureTimeline) {
+        signatureTimeline.kill();
+      }
+      resetToHidden();
+      signatureTimeline = gsap.timeline({ paused: true });
+
+      maskPaths.forEach((maskP, i) => {
+        const strokeP = strokePaths[i];
+        let len = 300;
+        try {
+          len = Math.ceil(maskP.getTotalLength() || 300);
+        } catch (e) {
+          len = 300;
+        }
+
+        const startTime = baseDelay + i * charDelay;
+
+        // Ensure path starts hidden at t=0
+        signatureTimeline.set(maskP, { strokeDasharray: len, strokeDashoffset: len, opacity: 0 }, 0);
+        if (strokeP) {
+          signatureTimeline.set(strokeP, { strokeDasharray: len, strokeDashoffset: len, opacity: 0 }, 0);
+        }
+
+        // opacity transition: delay + i * 0.2 + 0.01, duration: 0.01
+        signatureTimeline.to(maskP, { opacity: 1, duration: 0.01 }, startTime + 0.01);
+        if (strokeP) {
+          signatureTimeline.to(strokeP, { opacity: 1, duration: 0.01 }, startTime + 0.01);
+        }
+
+        // pathLength transition: delay + i * 0.2, duration: 1.5, ease: "easeInOut"
+        signatureTimeline.to(maskP, {
+          strokeDashoffset: 0,
+          duration: duration,
+          ease: 'power1.inOut'
+        }, startTime);
+
+        if (strokeP) {
+          signatureTimeline.to(strokeP, {
+            strokeDashoffset: 0,
+            duration: duration,
+            ease: 'power1.inOut'
+          }, startTime);
+        }
+      });
+    }
+
+    buildSignatureTimeline();
+
+    let isAtBottom = false;
+
+    function playSignature() {
+      buildSignatureTimeline();
+      signatureTimeline.play(0);
+    }
+
+    // Auto-animate whenever user scrolls to the very bottom of the home page
+    if (signatureObserver) {
+      signatureObserver.disconnect();
+    }
+
+    if ('IntersectionObserver' in window) {
+      signatureObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            if (!isAtBottom) {
+              isAtBottom = true;
+              playSignature();
+            }
+          } else {
+            // Scrolled away: reset so scrolling back to bottom replays
+            isAtBottom = false;
+          }
+        });
+      }, { threshold: 0.1 });
+      signatureObserver.observe(footer);
+    } else {
+      playSignature();
+    }
+
+    // Window scroll backup for fast touch flings / trackpad bottom scroll
+    if (!footerScrollListenerAttached) {
+      footerScrollListenerAttached = true;
+      let ticking = false;
+      window.addEventListener('scroll', () => {
+        if (!ticking) {
+          requestAnimationFrame(() => {
+            const homePage = document.getElementById('page-home');
+            if (homePage && homePage.classList.contains('active')) {
+              const scrollBottom = window.innerHeight + window.scrollY;
+              const totalHeight = document.documentElement.scrollHeight;
+              if (totalHeight - scrollBottom < 80) {
+                if (!isAtBottom) {
+                  isAtBottom = true;
+                  playSignature();
+                }
+              } else if (totalHeight - scrollBottom > 350) {
+                isAtBottom = false;
+              }
+            }
+            ticking = false;
+          });
+          ticking = true;
+        }
+      }, { passive: true });
+    }
+
+    // Interactive button: Single click = replay animation, Double click = open repo on browser
+    const sigBtn = footer.querySelector('#homeFooterSig') || footer.querySelector('.home-footer-caption-wrap');
+    if (sigBtn) {
+      let clickTimer = null;
+      const DOUBLE_CLICK_DELAY = 280;
+
+      function openRepo() {
+        window.open('https://github.com/omkarnub/friction', '_blank', 'noopener,noreferrer');
+      }
+
+      sigBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (clickTimer) {
+          // Double click detected! Cancel single click replay and open GitHub repo
+          clearTimeout(clickTimer);
+          clickTimer = null;
+          openRepo();
+        } else {
+          // Wait to see if a second click arrives within threshold
+          clickTimer = setTimeout(() => {
+            clickTimer = null;
+            // One click: replay animation!
+            playSignature();
+          }, DOUBLE_CLICK_DELAY);
+        }
+      });
+
+      // Also listen to native dblclick
+      sigBtn.addEventListener('dblclick', (e) => {
+        e.preventDefault();
+        if (clickTimer) {
+          clearTimeout(clickTimer);
+          clickTimer = null;
+        }
+        openRepo();
+      });
+
+      // Accessibility keyboard trigger: Enter key replays animation
+      sigBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          playSignature();
+        }
+      });
+    }
+  }
+
+  /* ================================================================
      INIT — Hook into page lifecycle
      ================================================================ */
   function tryInit() {
@@ -627,6 +824,7 @@
       buildFrictionMethodLoop();
       initScrollReveal();
       setupShowcaseVisibilityObserver();
+      initFooterSignature();
     }
   }
 
@@ -644,6 +842,7 @@
       buildReposeMethodLoop();
       buildFrictionMethodLoop();
       setupShowcaseVisibilityObserver();
+      initFooterSignature();
 
       // Refresh scroll reveal triggers
       setTimeout(() => {

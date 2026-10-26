@@ -15,6 +15,15 @@
   unicode-range: U+03B1, U+03BC, U+00B5, U+03B8, U+03C6, U+0391, U+039C;
 }
 
+/* ── Author Signature Font ── */
+@font-face {
+  font-family: 'Lastoria';
+  src: url('./LastoriaBoldRegular.otf') format('opentype');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* ── Custom Properties ── */
 :root {
   /* Core palette — pure black & white minimalism */
@@ -93,6 +102,15 @@
   --container-max: min(95vw, 1840px);
   --container-narrow: min(95vw, 1840px);
   --container-padding: clamp(1rem, 2vw, 2.25rem);
+
+  /* FlowButton variables */
+  --flow-btn-border: rgba(255, 255, 255, 0.28);
+  --flow-btn-bg: rgba(255, 255, 255, 0.035);
+  --flow-btn-text: #f5f5f5;
+  --flow-btn-circle: #ffffff;
+  --flow-btn-hover-text: #0a0a0a;
+  --flow-btn-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --flow-btn-hover-shadow: 0 14px 40px rgba(255, 255, 255, 0.22), 0 0 25px rgba(255, 255, 255, 0.12);
 }
 
 /* Light theme — eye-friendly warm off-white (#F7F2EB) + deep charcoal minimalism */
@@ -129,6 +147,15 @@
   /* Diagram lines — dark strokes on light canvas */
   --diagram-line-strong: rgba(30, 25, 20, 0.6);
   --diagram-axis: rgba(30, 25, 20, 0.35);
+
+  /* FlowButton light variables */
+  --flow-btn-border: rgba(0, 0, 0, 0.22);
+  --flow-btn-bg: rgba(0, 0, 0, 0.03);
+  --flow-btn-text: #121212;
+  --flow-btn-circle: #121212;
+  --flow-btn-hover-text: #F7F2EB;
+  --flow-btn-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --flow-btn-hover-shadow: 0 14px 36px rgba(0, 0, 0, 0.22);
   --diagram-line-faint: rgba(30, 25, 20, 0.14);
   --diagram-grid: rgba(30, 25, 20, 0.07);
 }
@@ -225,7 +252,9 @@
   align-items: center;
   justify-content: center;
   background: var(--bg-primary);
-  transition: opacity 0.45s ease;
+  transition: opacity 0.55s cubic-bezier(0.23, 1, 0.32, 1),
+              transform 0.55s cubic-bezier(0.23, 1, 0.32, 1),
+              filter 0.55s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .splash-screen::before {
@@ -269,6 +298,8 @@
 
 .splash-screen.dismissed {
   opacity: 0;
+  transform: scale(1.05);
+  filter: blur(8px);
   pointer-events: none;
 }
 
@@ -313,11 +344,8 @@
 }
 
 .splash-cta {
-  padding: 1.15rem 3.2rem;
-  font-size: 1.15rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  padding: 1.15rem 3.4rem;
+  font-size: 1.05rem;
 }
 
 .loader-text {
@@ -5115,3 +5143,288 @@ html.theme-transitioning *::after {
     max-width: calc(100vw - 55px);
   }
 }
+
+/* ===================================================================
+   Home Page Footer & Omkarnub Signature Animation (No Pill, Dim Caption)
+   =================================================================== */
+.home-footer {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 16px 64px 16px;
+  position: relative;
+  z-index: 10;
+  background: transparent;
+}
+
+.home-footer-caption-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: transparent;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+
+.home-footer-caption-wrap:hover {
+  transform: translateY(-1px);
+}
+
+.home-footer-caption-wrap:active {
+  transform: scale(0.98);
+}
+
+.home-footer-caption {
+  font-family: var(--font-body, system-ui, sans-serif);
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim, rgba(255, 255, 255, 0.45));
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.home-footer-caption-wrap:hover .home-footer-caption {
+  color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+}
+
+.home-footer-sig-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+#signatureSvg,
+.home-footer-sig-wrap .sig-svg {
+  width: 215px;
+  max-width: 55vw;
+  height: auto;
+  overflow: visible;
+  display: block;
+  color: #ffffff;
+  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.12));
+  transition: filter 0.3s ease;
+}
+
+.home-footer-caption-wrap:hover #signatureSvg,
+.home-footer-caption-wrap:hover .home-footer-sig-wrap .sig-svg {
+  filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.35));
+}
+
+/* Light Mode Overrides */
+[data-theme="light"] .home-footer-caption {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="light"] .home-footer-caption-wrap:hover .home-footer-caption {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+[data-theme="light"] #signatureSvg,
+[data-theme="light"] .home-footer-sig-wrap .sig-svg {
+  color: #111111;
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.08));
+}
+
+[data-theme="light"] .home-footer-caption-wrap:hover #signatureSvg,
+[data-theme="light"] .home-footer-caption-wrap:hover .home-footer-sig-wrap .sig-svg {
+  filter: drop-shadow(0 0 12px rgba(0, 0, 0, 0.16));
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 540px) {
+  .home-footer {
+    padding: 36px 12px 52px 12px;
+  }
+  .home-footer-caption-wrap {
+    gap: 10px;
+  }
+  .home-footer-caption {
+    font-size: 11.5px;
+  }
+  #signatureSvg,
+  .home-footer-sig-wrap .sig-svg {
+    width: 170px;
+  }
+}
+
+/* ===================================================================
+   FlowButton Component — Modern Fluid Interaction Button
+   =================================================================== */
+.flow-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  overflow: hidden;
+  border-radius: 100px;
+  border: 1.5px solid var(--flow-btn-border);
+  background: var(--flow-btn-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 1.15rem 3.4rem;
+  font-family: var(--font-body, system-ui);
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--flow-btn-text);
+  cursor: pointer;
+  outline: none;
+  text-decoration: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: var(--flow-btn-shadow);
+  transition: border-radius 600ms cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 600ms cubic-bezier(0.23, 1, 0.32, 1),
+              color 600ms cubic-bezier(0.23, 1, 0.32, 1),
+              transform 600ms cubic-bezier(0.23, 1, 0.32, 1),
+              box-shadow 600ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flow-btn:hover,
+.flow-btn.is-hovered {
+  border-color: transparent;
+  color: var(--flow-btn-hover-text);
+  border-radius: 14px;
+  transform: translateY(-2px);
+  box-shadow: var(--flow-btn-hover-shadow);
+}
+
+.flow-btn:active {
+  transform: scale(0.95) translateY(0);
+  transition-duration: 150ms;
+}
+
+/* Left Arrow (arr-2) — springs into view from left on hover */
+.flow-btn .flow-btn-arr-left {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: -35px;
+  stroke: var(--flow-btn-text);
+  fill: none;
+  z-index: 9;
+  pointer-events: none;
+  transition: left 800ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              stroke 600ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flow-btn:hover .flow-btn-arr-left,
+.flow-btn.is-hovered .flow-btn-arr-left {
+  left: 24px;
+  stroke: var(--flow-btn-hover-text);
+}
+
+/* Right Arrow (arr-1) — shoots off-screen to right on hover */
+.flow-btn .flow-btn-arr-right {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  right: 24px;
+  stroke: var(--flow-btn-text);
+  fill: none;
+  z-index: 9;
+  pointer-events: none;
+  transition: right 800ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              stroke 600ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flow-btn:hover .flow-btn-arr-right,
+.flow-btn.is-hovered .flow-btn-arr-right {
+  right: -35px;
+  stroke: var(--flow-btn-hover-text);
+}
+
+/* Button Text — shifts right on hover */
+.flow-btn .flow-btn-text {
+  position: relative;
+  z-index: 2;
+  transform: translateX(-10px);
+  transition: transform 800ms cubic-bezier(0.23, 1, 0.32, 1),
+              color 600ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flow-btn:hover .flow-btn-text,
+.flow-btn.is-hovered .flow-btn-text {
+  transform: translateX(10px);
+  color: var(--flow-btn-hover-text);
+}
+
+/* Expanding Ripple Circle — expands from center to fill button */
+.flow-btn .flow-btn-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 16px;
+  height: 16px;
+  background: var(--flow-btn-circle);
+  border-radius: 50%;
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: width 800ms cubic-bezier(0.19, 1, 0.22, 1),
+              height 800ms cubic-bezier(0.19, 1, 0.22, 1),
+              opacity 800ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.flow-btn:hover .flow-btn-circle,
+.flow-btn.is-hovered .flow-btn-circle {
+  width: 360px;
+  height: 360px;
+  opacity: 1;
+}
+
+/* Ambient Breathing Pulse for Splash CTA */
+@keyframes flowGlowPulse {
+  0%, 100% {
+    box-shadow: var(--flow-btn-shadow), 0 0 0 0 rgba(255, 255, 255, 0.15);
+  }
+  50% {
+    box-shadow: var(--flow-btn-shadow), 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+}
+
+.flow-btn.pulse-idle {
+  animation: flowGlowPulse 2.8s infinite ease-in-out;
+}
+.flow-btn:hover.pulse-idle,
+.flow-btn.is-hovered.pulse-idle {
+  animation: none;
+}
+
+/* Hero CTA specific tweaks */
+.flow-btn.hero-cta {
+  padding: 1rem 3rem;
+  font-size: 0.98rem;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 540px) {
+  .flow-btn {
+    padding: 1rem 2.6rem;
+    font-size: 0.95rem;
+  }
+  .flow-btn .flow-btn-arr-right {
+    right: 18px;
+  }
+  .flow-btn:hover .flow-btn-arr-left,
+  .flow-btn.is-hovered .flow-btn-arr-left {
+    left: 18px;
+  }
+  .flow-btn.hero-cta {
+    padding: 0.9rem 2.4rem;
+    font-size: 0.92rem;
+  }
+}
+
+

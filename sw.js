@@ -1,4 +1,4 @@
-const CACHE = "mech-lab-v8";
+const CACHE = "mech-lab-v15";
 
 const CORE_ASSETS = [
   "./",
@@ -18,7 +18,8 @@ const CORE_ASSETS = [
   "./js/get-started-bg.js",
   "./js/gsap.min.js",
   "./js/ScrollTrigger.min.js",
-  "./manifest.json"
+  "./manifest.json",
+  "./LastoriaBoldRegular.otf"
 ];
 
 self.addEventListener("install", (event) => {

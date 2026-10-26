@@ -56,6 +56,9 @@
     if (entry.angle < 0 || entry.angle > 90) {
       issues.push('Angle must be 0–90°');
     }
+    if (entry.method === 'repose' && entry.angle <= 0) {
+      issues.push('Angle of repose must be greater than 0°');
+    }
     if (entry.weight <= 0) {
       issues.push('Weight must be positive');
     }
@@ -381,6 +384,19 @@
   document.getElementById('reposeAddTrial').addEventListener('click', () => {
     if (!window.getReposeValues) return;
     const vals = window.getReposeValues();
+
+    // Guard against logging before slip has actually occurred
+    if (!vals.sliding) {
+      if (window.showSimToast) {
+        window.showSimToast(
+          'Block Has Not Slipped',
+          'Increase tilt angle α until the block slips to determine the Angle of Repose before recording.',
+          'OK'
+        );
+      }
+      return;
+    }
+
     logMethodSelect.value = 'repose';
     logMaterialSelect.value = vals.material;
     logMethodSelect.dispatchEvent(new Event('change', { bubbles: true }));
@@ -416,6 +432,19 @@
   document.getElementById('frictionAddTrial').addEventListener('click', () => {
     if (!window.getFrictionValues) return;
     const vals = window.getFrictionValues();
+
+    // Guard against logging before limiting motion has occurred
+    if (!vals.moving) {
+      if (window.showSimToast) {
+        window.showSimToast(
+          'Limiting Pull Not Reached',
+          'Add slotted weights to the pan until the block begins to move up the plane before recording.',
+          'OK'
+        );
+      }
+      return;
+    }
+
     logMethodSelect.value = 'friction';
     logMaterialSelect.value = vals.material;
     logMethodSelect.dispatchEvent(new Event('change', { bubbles: true }));

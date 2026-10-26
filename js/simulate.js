@@ -688,22 +688,22 @@
 
       // Normal Reaction N (perpendicular to plane surface)
       const nLen = Math.min(weight * 1.5 * cosA + 16, 55);
-      const nEndX = worldX + nLen * sinA;
+      const nEndX = worldX - nLen * sinA;
       const nEndY = worldY - nLen * cosA;
       forcesHTML += `
         <line x1="${worldX.toFixed(1)}" y1="${worldY.toFixed(1)}" x2="${nEndX.toFixed(1)}" y2="${nEndY.toFixed(1)}"
               stroke="var(--accent-purple)" stroke-width="1.8" stroke-dasharray="4,2" marker-end="url(#arrowPurple)" opacity="0.8"/>
-        <text x="${(nEndX + 6).toFixed(1)}" y="${(nEndY - 2).toFixed(1)}" fill="var(--accent-purple)" font-size="10" font-family="JetBrains Mono" font-weight="700">N</text>
+        <text x="${(nEndX - 12).toFixed(1)}" y="${(nEndY - 2).toFixed(1)}" fill="var(--accent-purple)" font-size="10" font-family="JetBrains Mono" font-weight="700">N</text>
       `;
 
-      // Limiting Static Friction force f (along surface up-slope towards pivot)
+      // Limiting Static Friction force f (along surface up-slope opposing downhill gravity)
       const fLen = Math.min(weight * 1.5 * sinA + 14, 55);
-      const fEndX = worldX - fLen * cosA;
+      const fEndX = worldX + fLen * cosA;
       const fEndY = worldY - fLen * sinA;
       forcesHTML += `
         <line x1="${worldX.toFixed(1)}" y1="${worldY.toFixed(1)}" x2="${fEndX.toFixed(1)}" y2="${fEndY.toFixed(1)}"
               stroke="var(--accent-amber)" stroke-width="2" marker-end="url(#arrowAmber)" opacity="0.85"/>
-        <text x="${(fEndX - 12).toFixed(1)}" y="${(fEndY + 3).toFixed(1)}" fill="var(--accent-amber)" font-size="10" font-family="JetBrains Mono" font-weight="700">f</text>
+        <text x="${(fEndX + 6).toFixed(1)}" y="${(fEndY - 2).toFixed(1)}" fill="var(--accent-amber)" font-size="10" font-family="JetBrains Mono" font-weight="700">f</text>
       `;
     }
     if (forcesGroup) forcesGroup.innerHTML = forcesHTML;
@@ -772,10 +772,22 @@
     }
   }
 
+  function setSliderValue(slider, nextVal) {
+    if (!slider) return;
+    slider._programmaticChange = true;
+    slider.value = nextVal;
+    if (slider._setCommittedValue) {
+      slider._setCommittedValue(nextVal);
+    }
+    if (slider._updateFill) slider._updateFill();
+    slider.dispatchEvent(new Event('input', { bubbles: true }));
+    slider.dispatchEvent(new Event('change', { bubbles: true }));
+    slider._programmaticChange = false;
+  }
+
   function resetReposeApparatus() {
     resetReposeBlock();
-    reposeAngleSlider.value = 0;
-    if (reposeAngleSlider._updateFill) reposeAngleSlider._updateFill();
+    setSliderValue(reposeAngleSlider, 0);
     refreshReposeThreshold(reposeMaterialSelect.value);
     renderReposeSVG();
     updateReposeReadout();
@@ -1134,6 +1146,29 @@
       <text x="${bWorldCenterX + 8}" y="${bWorldCenterY + gLen / 2 + 3}" fill="var(--accent-green)" font-size="10" font-family="JetBrains Mono" font-weight="700">W</text>
     `;
 
+    // Normal Reaction N (perpendicular to plane surface)
+    const nLen = Math.min(weight * 1.5 * cosA + 16, 55);
+    const nEndX = bWorldCenterX - nLen * sinA;
+    const nEndY = bWorldCenterY - nLen * cosA;
+    forcesHTML += `
+      <line x1="${bWorldCenterX.toFixed(1)}" y1="${bWorldCenterY.toFixed(1)}" x2="${nEndX.toFixed(1)}" y2="${nEndY.toFixed(1)}"
+            stroke="var(--accent-purple)" stroke-width="1.8" stroke-dasharray="4,2" marker-end="url(#arrowPurple)" opacity="0.8"/>
+      <text x="${(nEndX - 12).toFixed(1)}" y="${(nEndY - 2).toFixed(1)}" fill="var(--accent-purple)" font-size="10" font-family="JetBrains Mono" font-weight="700">N</text>
+    `;
+
+    // Limiting Static Friction force f (along plane down-slope, opposing upward pull P)
+    if (pullForce > 0.2) {
+      const fMag = Math.min(pullForce, simState.friction.trueMu * Wcosth);
+      const fLen = Math.min(fMag * 1.5 + 14, 55);
+      const fEndX = bWorldCenterX - fLen * cosA;
+      const fEndY = bWorldCenterY + fLen * sinA;
+      forcesHTML += `
+        <line x1="${bWorldCenterX.toFixed(1)}" y1="${bWorldCenterY.toFixed(1)}" x2="${fEndX.toFixed(1)}" y2="${fEndY.toFixed(1)}"
+              stroke="var(--accent-amber)" stroke-width="2" marker-end="url(#arrowAmber)" opacity="0.85"/>
+        <text x="${(fEndX - 12).toFixed(1)}" y="${(fEndY + 6).toFixed(1)}" fill="var(--accent-amber)" font-size="10" font-family="JetBrains Mono" font-weight="700">f</text>
+      `;
+    }
+
     // Tension Pull Force P (along plane towards pulley)
     if (pullForce > 0.2) {
       const pLen = Math.min(pullForce * 1.5 + 16, 65);
@@ -1149,8 +1184,7 @@
   }
 
   function resetFrictionApparatus() {
-    frictionForceSlider.value = 0;
-    if (frictionForceSlider._updateFill) frictionForceSlider._updateFill();
+    setSliderValue(frictionForceSlider, 0);
     simState.friction.moving = false;
     refreshFrictionThreshold(frictionMaterialSelect.value);
     renderFrictionSVG();
@@ -1254,8 +1288,7 @@
       const delta = parseFloat(btn.dataset.addP);
       const current = parseFloat(frictionForceSlider.value) || 0;
       const next = Math.min(100, Math.max(0, current + delta));
-      frictionForceSlider.value = next.toFixed(1);
-      updateFriction();
+      setSliderValue(frictionForceSlider, next.toFixed(1));
       if (frictionForceSlider._showProgressStep) {
         frictionForceSlider._showProgressStep(next - current);
       }
@@ -1266,12 +1299,9 @@
   if (clearPanBtn) {
     clearPanBtn.addEventListener('click', () => {
       const current = parseFloat(frictionForceSlider.value) || 0;
-      frictionForceSlider.value = 0;
-      updateFriction();
+      setSliderValue(frictionForceSlider, 0);
       if (frictionForceSlider._showProgressStep && current > 0) {
         frictionForceSlider._showProgressStep(-current);
-      } else if (frictionForceSlider._updateFill) {
-        frictionForceSlider._updateFill();
       }
     });
   }
@@ -1304,8 +1334,7 @@
       next = parseFloat(next.toFixed(Math.max(1, stepDecimals)));
 
       const actualDelta = next - current;
-      slider.value = next;
-      slider.dispatchEvent(new Event('input', { bubbles: true }));
+      setSliderValue(slider, next);
 
       if (slider._showProgressStep) {
         slider._showProgressStep(actualDelta);
@@ -1339,7 +1368,12 @@
 
       let isDragging = false;
       let startVal = parseFloat(slider.value) || 0;
+      let lastCommittedVal = startVal;
       let hideTimeout = null;
+
+      slider._setCommittedValue = (v) => {
+        lastCommittedVal = parseFloat(v) || 0;
+      };
 
       function updateFillAndRatio() {
         const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
@@ -1405,6 +1439,24 @@
         return e.clientX;
       }
 
+      // Capture-phase track-tap interception:
+      // Tapping anywhere on the track line outside the thumb is completely blocked!
+      function interceptTrackTap(e) {
+        if (!isDragging && !slider._programmaticChange) {
+          e.preventDefault();
+          e.stopPropagation();
+          e.stopImmediatePropagation();
+          slider.value = lastCommittedVal;
+          updateFillAndRatio();
+          return false;
+        }
+        lastCommittedVal = parseFloat(slider.value) || 0;
+      }
+
+      slider.addEventListener('input', interceptTrackTap, true);
+      slider.addEventListener('change', interceptTrackTap, true);
+      slider.addEventListener('click', interceptTrackTap, true);
+
       // Track tap prevention:
       // If user taps in between the slider line (not on the thumb), prevent movement!
       function handlePointerDown(e) {
@@ -1421,17 +1473,20 @@
         const dist = Math.abs(clientX - thumbCenterX);
 
         // Thumb diameter is 22px (radius 11px). 
-        // 22px for mouse, 26px for finger touch to ensure effortless touch grab.
-        const hitRadius = (e.type.startsWith('touch') || (e.pointerType && e.pointerType === 'touch')) ? 26 : 22;
+        // 28px hit radius for touch ensures comfortable finger touch grab directly on thumb,
+        // while any tap elsewhere on the track is strictly rejected.
+        const hitRadius = (e.type.startsWith('touch') || (e.pointerType && e.pointerType === 'touch')) ? 28 : 22;
         if (dist > hitRadius) {
           e.preventDefault();
           e.stopPropagation();
+          slider.value = lastCommittedVal;
           return;
         }
 
         // Holding the thumb and dragging:
         isDragging = true;
         startVal = parseFloat(slider.value) || 0;
+        lastCommittedVal = startVal;
         if (hideTimeout) clearTimeout(hideTimeout);
         showProgression(0, startVal);
       }
@@ -1459,6 +1514,7 @@
         steppedVal = parseFloat(steppedVal.toFixed(Math.max(1, stepDecimals)));
 
         if (parseFloat(slider.value) !== steppedVal) {
+          lastCommittedVal = steppedVal;
           slider.value = steppedVal;
           slider.dispatchEvent(new Event('input', { bubbles: true }));
         }
@@ -1477,6 +1533,7 @@
 
       function handleDragEnd() {
         if (isDragging) {
+          lastCommittedVal = parseFloat(slider.value) || 0;
           isDragging = false;
           hideProgression(650);
         }
@@ -1531,7 +1588,7 @@
     const weight = parseFloat(reposeWeightSlider.value);
     const mu = Math.tan(toRad(angle));
     const material = reposeMaterialSelect.value;
-    return { angle, weight, mu, material, method: 'repose' };
+    return { angle, weight, mu, material, method: 'repose', sliding: simState.repose.sliding };
   };
 
   window.getFrictionValues = function () {
@@ -1542,7 +1599,7 @@
     const Wcosth = weight * Math.cos(angleRad);
     const mu = Wcosth > 0.0001 ? (pullForce - weight * Math.sin(angleRad)) / Wcosth : null;
     const material = frictionMaterialSelect.value;
-    return { angle, weight, pullForce, mu, material, method: 'friction' };
+    return { angle, weight, pullForce, mu, material, method: 'friction', moving: simState.friction.moving };
   };
 
   /* ================================================================
