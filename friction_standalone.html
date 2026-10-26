@@ -1320,6 +1320,16 @@ th .sym,
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
+[data-theme="light"] input[type="range"] {
+  background: linear-gradient(
+    to right,
+    #121212 0%,
+    #121212 var(--slider-fill, 0%),
+    var(--bg-input) var(--slider-fill, 0%),
+    var(--bg-input) 100%
+  );
+}
+
 [data-theme="light"] input[type="range"]::-webkit-slider-thumb {
   background: #121212;
   border-color: var(--bg-card);
@@ -1415,7 +1425,7 @@ th .sym,
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: var(--space-sm);
+  margin-bottom: 14px;
 }
 
 .slider-label {
@@ -1438,12 +1448,23 @@ input[type="range"] {
   appearance: none;
   width: 100%;
   height: 8px;
-  background: var(--bg-input);
+  background: linear-gradient(
+    to right,
+    var(--text-primary) 0%,
+    var(--text-primary) var(--slider-fill, 0%),
+    var(--bg-input) var(--slider-fill, 0%),
+    var(--bg-input) 100%
+  );
   border-radius: 4px;
   outline: none;
   border: 1px solid var(--border-subtle);
-  cursor: pointer;
+  cursor: grab;
   touch-action: none;
+  transition: border-color var(--transition-fast);
+}
+
+input[type="range"]:active {
+  cursor: grabbing;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -2507,7 +2528,7 @@ td.invalid {
   line-height: 1.2;
 }
 
-/* Slider Stepper Controls (- / + buttons) */
+/* Slider Stepper Controls (- / + buttons) & Track Wrap */
 .slider-control-row {
   display: flex;
   align-items: center;
@@ -2515,9 +2536,112 @@ td.invalid {
   width: 100%;
 }
 
+.slider-track-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.slider-track-wrap input[type="range"],
 .slider-control-row input[type="range"] {
   flex: 1;
   min-width: 0;
+  width: 100%;
+}
+
+/* Floating Progression Display */
+.slider-progress-display {
+  position: absolute;
+  bottom: calc(100% + 9px);
+  left: calc(11px + (100% - 22px) * var(--thumb-ratio, 0));
+  transform: translateX(-50%) translateY(4px) scale(0.92);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(18, 18, 18, 0.94);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #f5f5f5;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.16s ease, transform 0.16s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.16s;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 10px rgba(255, 255, 255, 0.12);
+  z-index: 25;
+}
+
+/* Caret pointing down to the thumb */
+.slider-progress-display::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.22);
+}
+
+.slider-track-wrap.is-moving .slider-progress-display {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.slider-progress-display .prog-moved-label {
+  font-size: 0.64rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.slider-progress-display .prog-delta {
+  color: #00e5ff;
+  font-weight: 700;
+}
+
+.slider-progress-display .prog-delta.negative {
+  color: #ff9100;
+}
+
+.slider-progress-display .prog-val {
+  color: var(--text-primary);
+  padding-left: 5px;
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Light mode adjustments */
+[data-theme="light"] .slider-progress-display {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(50, 40, 30, 0.24);
+  color: #121212;
+  box-shadow: 0 4px 14px rgba(45, 35, 25, 0.14), 0 0 8px rgba(0, 0, 0, 0.06);
+}
+
+[data-theme="light"] .slider-progress-display::after {
+  border-top-color: rgba(50, 40, 30, 0.24);
+}
+
+[data-theme="light"] .slider-progress-display .prog-delta {
+  color: #0077aa;
+}
+
+[data-theme="light"] .slider-progress-display .prog-delta.negative {
+  color: #c05000;
+}
+
+[data-theme="light"] .slider-progress-display .prog-val {
+  color: #121212;
+  border-left-color: rgba(50, 40, 30, 0.18);
 }
 
 .slider-step-btn {
@@ -5891,7 +6015,14 @@ html.theme-transitioning *::after {
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="reposeAngle" data-step="-0.5"
                     aria-label="Decrease Angle">−</button>
-                  <input type="range" id="reposeAngle" min="0" max="89" value="0" step="0.5">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="reposeAngle" min="0" max="89" value="0" step="0.5">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0°</span>
+                      <span class="prog-val">0.0°</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="reposeAngle" data-step="0.5"
                     aria-label="Increase Angle">+</button>
                 </div>
@@ -5905,7 +6036,14 @@ html.theme-transitioning *::after {
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="reposeWeight" data-step="-0.5"
                     aria-label="Decrease Block Weight">−</button>
-                  <input type="range" id="reposeWeight" min="0.5" max="50" value="5" step="0.5">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="reposeWeight" min="0.5" max="50" value="5" step="0.5">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0 N</span>
+                      <span class="prog-val">5.0 N</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="reposeWeight" data-step="0.5"
                     aria-label="Increase Block Weight">+</button>
                 </div>
@@ -6081,7 +6219,14 @@ html.theme-transitioning *::after {
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="frictionAngle" data-step="-0.5"
                     aria-label="Decrease Angle">−</button>
-                  <input type="range" id="frictionAngle" min="0" max="89" value="0" step="0.5">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="frictionAngle" min="0" max="89" value="0" step="0.5">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0°</span>
+                      <span class="prog-val">0.0°</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="frictionAngle" data-step="0.5"
                     aria-label="Increase Angle">+</button>
                 </div>
@@ -6095,7 +6240,14 @@ html.theme-transitioning *::after {
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="frictionWeight" data-step="-0.5"
                     aria-label="Decrease Block Weight">−</button>
-                  <input type="range" id="frictionWeight" min="0.5" max="50" value="5" step="0.5">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="frictionWeight" min="0.5" max="50" value="5" step="0.5">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0 N</span>
+                      <span class="prog-val">5.0 N</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="frictionWeight" data-step="0.5"
                     aria-label="Increase Block Weight">+</button>
                 </div>
@@ -6109,7 +6261,14 @@ html.theme-transitioning *::after {
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="frictionForce" data-step="-0.5"
                     aria-label="Decrease Pull Force">−</button>
-                  <input type="range" id="frictionForce" min="0" max="100" value="0" step="0.1">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="frictionForce" min="0" max="100" value="0" step="0.1">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0 N</span>
+                      <span class="prog-val">0.0 N</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="frictionForce" data-step="0.5"
                     aria-label="Increase Pull Force">+</button>
                 </div>
@@ -7071,10 +7230,10 @@ html.theme-transitioning *::after {
               </div>
             </div>
 
-            <!-- Mughda Jagtap -->
+            <!-- Mugdha Jagtap(corrected spelling from mughda jagtap to Mugdha Jagtap-->
             <div class="team-card">
               <div class="team-card-header">
-                <h3 class="team-member-name">Mughda Jagtap</h3>
+                <h3 class="team-member-name">Mugdha Jagtap</h3>
                 <span class="team-role-tag">Contributor</span>
               </div>
               <div class="team-field">
@@ -9247,6 +9406,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function resetReposeApparatus() {
     resetReposeBlock();
     reposeAngleSlider.value = 0;
+    if (reposeAngleSlider._updateFill) reposeAngleSlider._updateFill();
     refreshReposeThreshold(reposeMaterialSelect.value);
     renderReposeSVG();
     updateReposeReadout();
@@ -9621,6 +9781,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   function resetFrictionApparatus() {
     frictionForceSlider.value = 0;
+    if (frictionForceSlider._updateFill) frictionForceSlider._updateFill();
     simState.friction.moving = false;
     refreshFrictionThreshold(frictionMaterialSelect.value);
     renderFrictionSVG();
@@ -9726,14 +9887,23 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const next = Math.min(100, Math.max(0, current + delta));
       frictionForceSlider.value = next.toFixed(1);
       updateFriction();
+      if (frictionForceSlider._showProgressStep) {
+        frictionForceSlider._showProgressStep(next - current);
+      }
     });
   });
 
   const clearPanBtn = document.getElementById('clearPanBtn');
   if (clearPanBtn) {
     clearPanBtn.addEventListener('click', () => {
+      const current = parseFloat(frictionForceSlider.value) || 0;
       frictionForceSlider.value = 0;
       updateFriction();
+      if (frictionForceSlider._showProgressStep && current > 0) {
+        frictionForceSlider._showProgressStep(-current);
+      } else if (frictionForceSlider._updateFill) {
+        frictionForceSlider._updateFill();
+      }
     });
   }
 
@@ -9764,10 +9934,154 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const stepDecimals = (step.toString().split('.')[1] || '').length;
       next = parseFloat(next.toFixed(Math.max(1, stepDecimals)));
 
+      const actualDelta = next - current;
       slider.value = next;
       slider.dispatchEvent(new Event('input', { bubbles: true }));
+
+      if (slider._showProgressStep) {
+        slider._showProgressStep(actualDelta);
+      }
     });
   });
+
+  /* ================================================================
+     Simulation Sliders:
+     - Hold and drag thumb only (tapping on track line blocked)
+     - Real-time progression display showing how much the slider has moved
+     - Stepper buttons (- / +) integration with progression feedback
+     ================================================================ */
+  function initSimulationSliders() {
+    const sliderConfigs = [
+      { id: 'reposeAngle', unit: '°', decimals: 1 },
+      { id: 'reposeWeight', unit: ' N', decimals: 1 },
+      { id: 'frictionAngle', unit: '°', decimals: 1 },
+      { id: 'frictionWeight', unit: ' N', decimals: 1 },
+      { id: 'frictionForce', unit: ' N', decimals: 1 }
+    ];
+
+    sliderConfigs.forEach(cfg => {
+      const slider = document.getElementById(cfg.id);
+      if (!slider) return;
+
+      const wrap = slider.closest('.slider-track-wrap') || slider.parentElement;
+      const bubble = wrap ? wrap.querySelector('.slider-progress-display') : null;
+      const bubbleDelta = bubble ? bubble.querySelector('.prog-delta') : null;
+      const bubbleVal = bubble ? bubble.querySelector('.prog-val') : null;
+
+      let isDragging = false;
+      let startVal = parseFloat(slider.value) || 0;
+      let hideTimeout = null;
+
+      function updateFillAndRatio() {
+        const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
+        const max = parseFloat(slider.max) !== undefined ? parseFloat(slider.max) : 100;
+        const val = parseFloat(slider.value) || 0;
+        const ratio = max > min ? Math.max(0, Math.min(1, (val - min) / (max - min))) : 0;
+
+        slider.style.setProperty('--slider-fill', `${(ratio * 100).toFixed(2)}%`);
+        if (wrap) wrap.style.setProperty('--thumb-ratio', ratio.toFixed(4));
+        return { min, max, val, ratio };
+      }
+
+      function showProgression(deltaVal, currentVal, autoHideMs = null) {
+        if (!bubble) return;
+        const cur = currentVal !== undefined ? currentVal : (parseFloat(slider.value) || 0);
+        const delta = deltaVal !== undefined ? deltaVal : (cur - startVal);
+
+        if (bubbleDelta) {
+          const sign = delta > 0.0001 ? '+' : (delta < -0.0001 ? '−' : '');
+          const absDelta = Math.abs(delta);
+          bubbleDelta.textContent = `${sign}${absDelta.toFixed(cfg.decimals)}${cfg.unit}`;
+          if (delta < -0.0001) {
+            bubbleDelta.classList.add('negative');
+          } else {
+            bubbleDelta.classList.remove('negative');
+          }
+        }
+
+        if (bubbleVal) {
+          bubbleVal.textContent = `${cur.toFixed(cfg.decimals)}${cfg.unit}`;
+        }
+
+        updateFillAndRatio();
+        if (wrap) wrap.classList.add('is-moving');
+
+        if (hideTimeout) clearTimeout(hideTimeout);
+        if (autoHideMs) {
+          hideTimeout = setTimeout(() => {
+            if (!isDragging && wrap) wrap.classList.remove('is-moving');
+          }, autoHideMs);
+        }
+      }
+
+      function hideProgression(delay = 650) {
+        if (hideTimeout) clearTimeout(hideTimeout);
+        hideTimeout = setTimeout(() => {
+          if (!isDragging && wrap) wrap.classList.remove('is-moving');
+        }, delay);
+      }
+
+      // Initial track fill & thumb ratio
+      updateFillAndRatio();
+
+      // Expose helpers for external buttons (steppers, pan chips, resets)
+      slider._showProgressStep = (stepDelta) => {
+        showProgression(stepDelta, parseFloat(slider.value) || 0, 1400);
+      };
+      slider._updateFill = updateFillAndRatio;
+
+      // Track tap prevention:
+      // If user taps in between the slider line (not on the thumb), prevent movement!
+      function handlePointerDown(e) {
+        const rect = slider.getBoundingClientRect();
+        const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
+        const max = parseFloat(slider.max) !== undefined ? parseFloat(slider.max) : 100;
+        const val = parseFloat(slider.value) || 0;
+        const ratio = max > min ? (val - min) / (max - min) : 0;
+
+        const thumbWidth = 22;
+        const thumbCenterX = rect.left + (thumbWidth / 2) + ratio * (rect.width - thumbWidth);
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const dist = Math.abs(clientX - thumbCenterX);
+
+        // Thumb diameter is 22px (radius 11px). 22px hit radius gives a comfortable 44px touch target.
+        if (dist > 22) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+
+        // Holding the thumb and dragging:
+        isDragging = true;
+        startVal = parseFloat(slider.value) || 0;
+        if (hideTimeout) clearTimeout(hideTimeout);
+        showProgression(0, startVal);
+      }
+
+      slider.addEventListener('pointerdown', handlePointerDown, { passive: false });
+      slider.addEventListener('touchstart', handlePointerDown, { passive: false });
+      slider.addEventListener('mousedown', handlePointerDown, { passive: false });
+
+      slider.addEventListener('input', () => {
+        updateFillAndRatio();
+        if (isDragging) {
+          showProgression();
+        }
+      });
+
+      function handleDragEnd() {
+        if (isDragging) {
+          isDragging = false;
+          hideProgression(650);
+        }
+      }
+
+      window.addEventListener('pointerup', handleDragEnd);
+      window.addEventListener('pointercancel', handleDragEnd);
+      window.addEventListener('touchend', handleDragEnd);
+      window.addEventListener('mouseup', handleDragEnd);
+    });
+  }
 
   /* ================================================================
      Tab Switching
@@ -9823,6 +10137,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   /* ================================================================
      Initial Render
      ================================================================ */
+  initSimulationSliders();
   renderReposeSVG();
   updateReposeReadout();
   renderFrictionSVG();

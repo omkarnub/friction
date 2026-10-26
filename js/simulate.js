@@ -775,6 +775,7 @@
   function resetReposeApparatus() {
     resetReposeBlock();
     reposeAngleSlider.value = 0;
+    if (reposeAngleSlider._updateFill) reposeAngleSlider._updateFill();
     refreshReposeThreshold(reposeMaterialSelect.value);
     renderReposeSVG();
     updateReposeReadout();
@@ -1149,6 +1150,7 @@
 
   function resetFrictionApparatus() {
     frictionForceSlider.value = 0;
+    if (frictionForceSlider._updateFill) frictionForceSlider._updateFill();
     simState.friction.moving = false;
     refreshFrictionThreshold(frictionMaterialSelect.value);
     renderFrictionSVG();
@@ -1254,14 +1256,23 @@
       const next = Math.min(100, Math.max(0, current + delta));
       frictionForceSlider.value = next.toFixed(1);
       updateFriction();
+      if (frictionForceSlider._showProgressStep) {
+        frictionForceSlider._showProgressStep(next - current);
+      }
     });
   });
 
   const clearPanBtn = document.getElementById('clearPanBtn');
   if (clearPanBtn) {
     clearPanBtn.addEventListener('click', () => {
+      const current = parseFloat(frictionForceSlider.value) || 0;
       frictionForceSlider.value = 0;
       updateFriction();
+      if (frictionForceSlider._showProgressStep && current > 0) {
+        frictionForceSlider._showProgressStep(-current);
+      } else if (frictionForceSlider._updateFill) {
+        frictionForceSlider._updateFill();
+      }
     });
   }
 
@@ -1292,10 +1303,154 @@
       const stepDecimals = (step.toString().split('.')[1] || '').length;
       next = parseFloat(next.toFixed(Math.max(1, stepDecimals)));
 
+      const actualDelta = next - current;
       slider.value = next;
       slider.dispatchEvent(new Event('input', { bubbles: true }));
+
+      if (slider._showProgressStep) {
+        slider._showProgressStep(actualDelta);
+      }
     });
   });
+
+  /* ================================================================
+     Simulation Sliders:
+     - Hold and drag thumb only (tapping on track line blocked)
+     - Real-time progression display showing how much the slider has moved
+     - Stepper buttons (- / +) integration with progression feedback
+     ================================================================ */
+  function initSimulationSliders() {
+    const sliderConfigs = [
+      { id: 'reposeAngle', unit: '°', decimals: 1 },
+      { id: 'reposeWeight', unit: ' N', decimals: 1 },
+      { id: 'frictionAngle', unit: '°', decimals: 1 },
+      { id: 'frictionWeight', unit: ' N', decimals: 1 },
+      { id: 'frictionForce', unit: ' N', decimals: 1 }
+    ];
+
+    sliderConfigs.forEach(cfg => {
+      const slider = document.getElementById(cfg.id);
+      if (!slider) return;
+
+      const wrap = slider.closest('.slider-track-wrap') || slider.parentElement;
+      const bubble = wrap ? wrap.querySelector('.slider-progress-display') : null;
+      const bubbleDelta = bubble ? bubble.querySelector('.prog-delta') : null;
+      const bubbleVal = bubble ? bubble.querySelector('.prog-val') : null;
+
+      let isDragging = false;
+      let startVal = parseFloat(slider.value) || 0;
+      let hideTimeout = null;
+
+      function updateFillAndRatio() {
+        const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
+        const max = parseFloat(slider.max) !== undefined ? parseFloat(slider.max) : 100;
+        const val = parseFloat(slider.value) || 0;
+        const ratio = max > min ? Math.max(0, Math.min(1, (val - min) / (max - min))) : 0;
+
+        slider.style.setProperty('--slider-fill', `${(ratio * 100).toFixed(2)}%`);
+        if (wrap) wrap.style.setProperty('--thumb-ratio', ratio.toFixed(4));
+        return { min, max, val, ratio };
+      }
+
+      function showProgression(deltaVal, currentVal, autoHideMs = null) {
+        if (!bubble) return;
+        const cur = currentVal !== undefined ? currentVal : (parseFloat(slider.value) || 0);
+        const delta = deltaVal !== undefined ? deltaVal : (cur - startVal);
+
+        if (bubbleDelta) {
+          const sign = delta > 0.0001 ? '+' : (delta < -0.0001 ? '−' : '');
+          const absDelta = Math.abs(delta);
+          bubbleDelta.textContent = `${sign}${absDelta.toFixed(cfg.decimals)}${cfg.unit}`;
+          if (delta < -0.0001) {
+            bubbleDelta.classList.add('negative');
+          } else {
+            bubbleDelta.classList.remove('negative');
+          }
+        }
+
+        if (bubbleVal) {
+          bubbleVal.textContent = `${cur.toFixed(cfg.decimals)}${cfg.unit}`;
+        }
+
+        updateFillAndRatio();
+        if (wrap) wrap.classList.add('is-moving');
+
+        if (hideTimeout) clearTimeout(hideTimeout);
+        if (autoHideMs) {
+          hideTimeout = setTimeout(() => {
+            if (!isDragging && wrap) wrap.classList.remove('is-moving');
+          }, autoHideMs);
+        }
+      }
+
+      function hideProgression(delay = 650) {
+        if (hideTimeout) clearTimeout(hideTimeout);
+        hideTimeout = setTimeout(() => {
+          if (!isDragging && wrap) wrap.classList.remove('is-moving');
+        }, delay);
+      }
+
+      // Initial track fill & thumb ratio
+      updateFillAndRatio();
+
+      // Expose helpers for external buttons (steppers, pan chips, resets)
+      slider._showProgressStep = (stepDelta) => {
+        showProgression(stepDelta, parseFloat(slider.value) || 0, 1400);
+      };
+      slider._updateFill = updateFillAndRatio;
+
+      // Track tap prevention:
+      // If user taps in between the slider line (not on the thumb), prevent movement!
+      function handlePointerDown(e) {
+        const rect = slider.getBoundingClientRect();
+        const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
+        const max = parseFloat(slider.max) !== undefined ? parseFloat(slider.max) : 100;
+        const val = parseFloat(slider.value) || 0;
+        const ratio = max > min ? (val - min) / (max - min) : 0;
+
+        const thumbWidth = 22;
+        const thumbCenterX = rect.left + (thumbWidth / 2) + ratio * (rect.width - thumbWidth);
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const dist = Math.abs(clientX - thumbCenterX);
+
+        // Thumb diameter is 22px (radius 11px). 22px hit radius gives a comfortable 44px touch target.
+        if (dist > 22) {
+          e.preventDefault();
+          e.stopPropagation();
+          return;
+        }
+
+        // Holding the thumb and dragging:
+        isDragging = true;
+        startVal = parseFloat(slider.value) || 0;
+        if (hideTimeout) clearTimeout(hideTimeout);
+        showProgression(0, startVal);
+      }
+
+      slider.addEventListener('pointerdown', handlePointerDown, { passive: false });
+      slider.addEventListener('touchstart', handlePointerDown, { passive: false });
+      slider.addEventListener('mousedown', handlePointerDown, { passive: false });
+
+      slider.addEventListener('input', () => {
+        updateFillAndRatio();
+        if (isDragging) {
+          showProgression();
+        }
+      });
+
+      function handleDragEnd() {
+        if (isDragging) {
+          isDragging = false;
+          hideProgression(650);
+        }
+      }
+
+      window.addEventListener('pointerup', handleDragEnd);
+      window.addEventListener('pointercancel', handleDragEnd);
+      window.addEventListener('touchend', handleDragEnd);
+      window.addEventListener('mouseup', handleDragEnd);
+    });
+  }
 
   /* ================================================================
      Tab Switching
@@ -1351,6 +1506,7 @@
   /* ================================================================
      Initial Render
      ================================================================ */
+  initSimulationSliders();
   renderReposeSVG();
   updateReposeReadout();
   renderFrictionSVG();

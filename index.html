@@ -15,7 +15,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Anton&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Lexend:wght@100..900&family=Outfit:wght@100..900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=21">
+  <link rel="stylesheet" href="styles.css?v=22">
   <link rel="stylesheet" href="StaggeredMenu.css?v=2">
 
   <!-- PWA: Add to Home Screen support -->
@@ -1046,7 +1046,14 @@
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="reposeAngle" data-step="-0.5"
                     aria-label="Decrease Angle">−</button>
-                  <input type="range" id="reposeAngle" min="0" max="89" value="0" step="0.5">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="reposeAngle" min="0" max="89" value="0" step="0.5">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0°</span>
+                      <span class="prog-val">0.0°</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="reposeAngle" data-step="0.5"
                     aria-label="Increase Angle">+</button>
                 </div>
@@ -1060,7 +1067,14 @@
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="reposeWeight" data-step="-0.5"
                     aria-label="Decrease Block Weight">−</button>
-                  <input type="range" id="reposeWeight" min="0.5" max="50" value="5" step="0.5">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="reposeWeight" min="0.5" max="50" value="5" step="0.5">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0 N</span>
+                      <span class="prog-val">5.0 N</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="reposeWeight" data-step="0.5"
                     aria-label="Increase Block Weight">+</button>
                 </div>
@@ -1236,7 +1250,14 @@
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="frictionAngle" data-step="-0.5"
                     aria-label="Decrease Angle">−</button>
-                  <input type="range" id="frictionAngle" min="0" max="89" value="0" step="0.5">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="frictionAngle" min="0" max="89" value="0" step="0.5">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0°</span>
+                      <span class="prog-val">0.0°</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="frictionAngle" data-step="0.5"
                     aria-label="Increase Angle">+</button>
                 </div>
@@ -1250,7 +1271,14 @@
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="frictionWeight" data-step="-0.5"
                     aria-label="Decrease Block Weight">−</button>
-                  <input type="range" id="frictionWeight" min="0.5" max="50" value="5" step="0.5">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="frictionWeight" min="0.5" max="50" value="5" step="0.5">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0 N</span>
+                      <span class="prog-val">5.0 N</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="frictionWeight" data-step="0.5"
                     aria-label="Increase Block Weight">+</button>
                 </div>
@@ -1264,7 +1292,14 @@
                 <div class="slider-control-row">
                   <button type="button" class="slider-step-btn" data-step-target="frictionForce" data-step="-0.5"
                     aria-label="Decrease Pull Force">−</button>
-                  <input type="range" id="frictionForce" min="0" max="100" value="0" step="0.1">
+                  <div class="slider-track-wrap">
+                    <input type="range" id="frictionForce" min="0" max="100" value="0" step="0.1">
+                    <div class="slider-progress-display" aria-hidden="true">
+                      <span class="prog-moved-label">Moved:</span>
+                      <span class="prog-delta">+0.0 N</span>
+                      <span class="prog-val">0.0 N</span>
+                    </div>
+                  </div>
                   <button type="button" class="slider-step-btn" data-step-target="frictionForce" data-step="0.5"
                     aria-label="Increase Pull Force">+</button>
                 </div>
@@ -2340,7 +2375,7 @@
   <script src="js/ScrollTrigger.min.js?v=2"></script>
   <script src="js/home-showcase.js?v=4"></script>
   <script src="js/theory.js?v=2"></script>
-  <script src="js/simulate.js?v=17"></script>
+  <script src="js/simulate.js?v=18"></script>
   <script src="js/haptics.js?v=1"></script>
   <script src="js/data-log.js?v=3"></script>
   <script src="js/compare.js?v=2"></script>

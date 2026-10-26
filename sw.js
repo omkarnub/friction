@@ -1,4 +1,4 @@
-const CACHE = "mech-lab-v1";
+const CACHE = "mech-lab-v2";
 
 const CORE_ASSETS = [
   "./",
