@@ -1777,16 +1777,46 @@ td.invalid {
   color: inherit;
 }
 
-/* ── SplitText GSAP Animation ── */
+/* ── Kokonut UI — Kinetic Text Reveal ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.kinetic-reveal,
 .split-parent {
   text-align: inherit;
-  overflow: hidden;
-  display: inline-block;
-  white-space: normal;
-  word-wrap: break-word;
-  will-change: transform, opacity;
+  display: inline-flex;
+  flex-wrap: wrap;
+  white-space: pre-wrap;
+  align-items: baseline;
+  justify-content: center;
+  max-width: 100%;
+  vertical-align: baseline;
   background: none !important;
   -webkit-text-fill-color: unset !important;
+}
+
+.kinetic-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  padding-bottom: 0.08em;
+  line-height: inherit;
+}
+
+.kinetic-segment {
+  display: inline-block;
+  vertical-align: baseline;
+  will-change: transform, opacity, filter;
+  color: inherit;
 }
 
 .split-line {
@@ -2020,10 +2050,11 @@ td.invalid {
   letter-spacing: -0.01em;
 }
 
-.scroll-reveal-text .sr-word {
-  display: inline-block;
-  opacity: 0.12;
-  filter: blur(4px);
+.scroll-reveal-text .sr-word,
+.sr-word {
+  display: inline;
+  opacity: 1;
+  filter: none;
 }
 
 /* ── Learning points ── */
@@ -2264,7 +2295,7 @@ td.invalid {
 
 /* ── Scroll Spacer ── */
 .learn-scroll-spacer {
-  height: clamp(15rem, 30vh, 25rem);
+  height: clamp(2rem, 4vh, 3.5rem);
   pointer-events: none;
 }
 
@@ -2555,7 +2586,7 @@ td.invalid {
 .slider-progress-display {
   position: absolute;
   bottom: calc(100% + 9px);
-  left: calc(11px + (100% - 22px) * var(--thumb-ratio, 0));
+  left: clamp(38px, calc(11px + (100% - 22px) * var(--thumb-ratio, 0)), calc(100% - 38px));
   transform: translateX(-50%) translateY(4px) scale(0.92);
   display: inline-flex;
   align-items: center;
@@ -4282,7 +4313,7 @@ td.invalid {
     will-change: transform;
   }
 
-  /* On mobile: no text scroll animation, text is fully clear and visible */
+  /* Text is fully clear and visible without scroll animation */
   .sr-word,
   .scroll-reveal-text .sr-word,
   .learn-point-title .sr-word,
@@ -4908,6 +4939,202 @@ html.theme-transitioning *::after {
 .manual-view-mobile .manual-img-wrap {
   max-width: 380px;
   margin: 0 auto;
+}
+
+/* ===================================================================
+   Kokonut UI — Scroll Index
+   =================================================================== */
+.scroll-index-nav {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-index-nav.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.scroll-index-rail {
+  position: relative;
+  width: 44px;
+  height: 280px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.scroll-index-rail[data-dragging] {
+  cursor: grabbing;
+}
+
+.scroll-index-tick {
+  position: absolute;
+  right: 0;
+  height: 16px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.scroll-index-tick.major {
+  width: 15px;
+}
+
+.scroll-index-tick.minor {
+  width: 9px;
+}
+
+.scroll-index-tick:focus-visible .scroll-index-bar {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+.scroll-index-bar {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  height: 1.5px;
+  width: 100%;
+  transform-origin: right center;
+  transform: translateY(-50%) scaleX(var(--swell, 1));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background-color 0.2s ease-out, transform 0.1s ease-out;
+}
+
+.scroll-index-tick[data-state="passed"] .scroll-index-bar {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.scroll-index-tick[data-state="current"] .scroll-index-bar {
+  background: #00e5ff;
+  height: 2px;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.7);
+}
+
+.scroll-index-head {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 2.5px;
+  width: 24px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: #ffffff;
+  will-change: transform;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  transition: transform 0.05s linear;
+}
+
+.scroll-index-label {
+  position: absolute;
+  top: 0;
+  right: 48px;
+  white-space: nowrap;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  background: rgba(18, 18, 18, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f5f5f5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 0, 0) translateY(-50%);
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+  z-index: 95;
+}
+
+/* Light theme support */
+[data-theme="light"] .scroll-index-bar {
+  background: rgba(40, 35, 30, 0.22);
+}
+
+[data-theme="light"] .scroll-index-tick[data-state="passed"] .scroll-index-bar {
+  background: rgba(40, 35, 30, 0.7);
+}
+
+[data-theme="light"] .scroll-index-tick[data-state="current"] .scroll-index-bar {
+  background: #0077aa;
+  box-shadow: 0 0 8px rgba(0, 119, 170, 0.5);
+}
+
+[data-theme="light"] .scroll-index-head {
+  background: #121212;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .scroll-index-label {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(50, 40, 30, 0.2);
+  color: #121212;
+  box-shadow: 0 4px 14px rgba(45, 35, 25, 0.12);
+}
+
+@media (max-width: 1024px) {
+  .scroll-index-nav {
+    right: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .scroll-index-nav {
+    right: 14px;
+    z-index: 95;
+  }
+
+  .scroll-index-rail {
+    width: 36px;
+    height: 260px;
+  }
+
+  .scroll-index-label {
+    right: 42px;
+    max-width: calc(100vw - 70px);
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 420px) {
+  .scroll-index-nav {
+    right: 10px;
+  }
+
+  .scroll-index-rail {
+    width: 32px;
+    height: 240px;
+  }
+
+  .scroll-index-label {
+    right: 36px;
+    max-width: calc(100vw - 55px);
+  }
 }
 
 
@@ -8310,109 +8537,26 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
 
   /* ================================================================
-     PART 2 — Scroll Reveal (Word-by-word blur + opacity on scroll)
+     PART 2 — Scroll Reveal (Disabled: text is clean, static, 100% visible)
      ================================================================ */
   let scrollRevealInitialized = false;
 
   function initScrollReveal() {
+    // Clean, static, 100% visible text with no scroll animation across all devices
     const textEls = document.querySelectorAll('[data-sr-text]');
-    const isMobile = window.innerWidth <= 768;
-
-    if (isMobile) {
-      // Mobile platform: No text scroll animation at all — clean, static, 100% smooth scrolling
-      textEls.forEach(el => {
-        el.style.opacity = '1';
-        el.style.filter = 'none';
-        el.querySelectorAll('.sr-word').forEach(span => {
-          span.style.opacity = '1';
-          span.style.filter = 'none';
-          span.style.transform = 'none';
-        });
-      });
-      document.querySelectorAll('.learn-point-number').forEach(el => {
-        el.style.opacity = '0.4';
-        el.style.transform = 'none';
-      });
-      return;
-    }
-
-    // Desktop platform: Original word-by-word blur-to-clear + opacity scroll reveal animation
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-    gsap.registerPlugin(ScrollTrigger);
-
     textEls.forEach(el => {
-      let wordSpans = el.querySelectorAll('.sr-word');
-      if (!wordSpans.length) {
-        const raw = el.textContent.trim();
-        if (!raw) return;
-
-        el.innerHTML = '';
-        const words = raw.split(/\s+/);
-        words.forEach((word, i) => {
-          const span = document.createElement('span');
-          span.className = 'sr-word';
-          span.textContent = word;
-          el.appendChild(span);
-          if (i < words.length - 1) {
-            el.appendChild(document.createTextNode(' '));
-          }
-        });
-        wordSpans = el.querySelectorAll('.sr-word');
-      }
-
-      if (!wordSpans.length) return;
-
-      // Base opacity animation
-      gsap.fromTo(wordSpans,
-        { opacity: 0.12 },
-        {
-          opacity: 1,
-          ease: 'none',
-          stagger: 0.05,
-          scrollTrigger: {
-            trigger: el,
-            start: 'top bottom-=15%',
-            end: 'top center-=10%',
-            scrub: true,
-          }
-        }
-      );
-
-      // Blur animation
-      gsap.fromTo(wordSpans,
-        { filter: 'blur(4px)' },
-        {
-          filter: 'blur(0px)',
-          ease: 'none',
-          stagger: 0.05,
-          scrollTrigger: {
-            trigger: el,
-            start: 'top bottom-=15%',
-            end: 'top center-=10%',
-            scrub: true,
-          }
-        }
-      );
+      el.style.opacity = '1';
+      el.style.filter = 'none';
+      el.querySelectorAll('.sr-word').forEach(span => {
+        span.style.opacity = '1';
+        span.style.filter = 'none';
+        span.style.transform = 'none';
+      });
     });
-
-    // Also animate the learn-point-number elements on desktop
     document.querySelectorAll('.learn-point-number').forEach(el => {
-      gsap.fromTo(el,
-        { opacity: 0.1, y: 20 },
-        {
-          opacity: 0.4,
-          y: 0,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: el.closest('.learn-point') || el.closest('.learn-method-header'),
-            start: 'top bottom-=10%',
-            end: 'top center',
-            scrub: true,
-          }
-        }
-      );
+      el.style.opacity = '0.4';
+      el.style.transform = 'none';
     });
-
     scrollRevealInitialized = true;
   }
 
@@ -10030,6 +10174,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       };
       slider._updateFill = updateFillAndRatio;
 
+      function getClientX(e) {
+        if (e.touches && e.touches.length > 0) return e.touches[0].clientX;
+        if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0].clientX;
+        return e.clientX;
+      }
+
       // Track tap prevention:
       // If user taps in between the slider line (not on the thumb), prevent movement!
       function handlePointerDown(e) {
@@ -10041,11 +10191,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
         const thumbWidth = 22;
         const thumbCenterX = rect.left + (thumbWidth / 2) + ratio * (rect.width - thumbWidth);
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientX = getClientX(e);
+        if (clientX === undefined) return;
         const dist = Math.abs(clientX - thumbCenterX);
 
-        // Thumb diameter is 22px (radius 11px). 22px hit radius gives a comfortable 44px touch target.
-        if (dist > 22) {
+        // Thumb diameter is 22px (radius 11px). 
+        // 22px for mouse, 26px for finger touch to ensure effortless touch grab.
+        const hitRadius = (e.type.startsWith('touch') || (e.pointerType && e.pointerType === 'touch')) ? 26 : 22;
+        if (dist > hitRadius) {
           e.preventDefault();
           e.stopPropagation();
           return;
@@ -10056,6 +10209,34 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         startVal = parseFloat(slider.value) || 0;
         if (hideTimeout) clearTimeout(hideTimeout);
         showProgression(0, startVal);
+      }
+
+      function handleDragMove(e) {
+        if (!isDragging) return;
+        const clientX = getClientX(e);
+        if (clientX === undefined) return;
+
+        const rect = slider.getBoundingClientRect();
+        const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
+        const max = parseFloat(slider.max) !== undefined ? parseFloat(slider.max) : 100;
+        const step = parseFloat(slider.step) || 0.1;
+        const thumbWidth = 22;
+        const trackWidth = rect.width - thumbWidth;
+        if (trackWidth <= 0) return;
+
+        const relX = clientX - (rect.left + thumbWidth / 2);
+        const ratio = Math.max(0, Math.min(1, relX / trackWidth));
+        const rawVal = min + ratio * (max - min);
+
+        const stepDecimals = (step.toString().split('.')[1] || '').length;
+        let steppedVal = Math.round((rawVal - min) / step) * step + min;
+        steppedVal = Math.max(min, Math.min(max, steppedVal));
+        steppedVal = parseFloat(steppedVal.toFixed(Math.max(1, stepDecimals)));
+
+        if (parseFloat(slider.value) !== steppedVal) {
+          slider.value = steppedVal;
+          slider.dispatchEvent(new Event('input', { bubbles: true }));
+        }
       }
 
       slider.addEventListener('pointerdown', handlePointerDown, { passive: false });
@@ -10076,9 +10257,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         }
       }
 
+      window.addEventListener('pointermove', handleDragMove, { passive: true });
+      window.addEventListener('touchmove', handleDragMove, { passive: true });
+      window.addEventListener('mousemove', handleDragMove, { passive: true });
+
       window.addEventListener('pointerup', handleDragEnd);
       window.addEventListener('pointercancel', handleDragEnd);
       window.addEventListener('touchend', handleDragEnd);
+      window.addEventListener('touchcancel', handleDragEnd);
       window.addEventListener('mouseup', handleDragEnd);
     });
   }
@@ -12737,140 +12923,202 @@ gsap/CSSPlugin.js:
         gsap.registerPlugin(ScrollTrigger);
       }
 
-      function initSplitText(el, options = {}) {
+      // ══════════════════════════════════════════════════════════════
+      // Kokonut UI — Kinetic Text Reveal (Vanilla JS / GSAP)
+      // Adapted from KineticTextReveal by @dorianbaffier
+      // ══════════════════════════════════════════════════════════════
+      function splitIntoGraphemes(value) {
+        if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
+          const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+          return Array.from(segmenter.segment(value), ({ segment }) => segment);
+        }
+        return Array.from(value);
+      }
+
+      function getKineticSegments(text, splitBy) {
+        let animatedIndex = 0;
+        if (splitBy === 'lines') {
+          return text.split('\n').map((line) => {
+            const animated = line.length > 0;
+            return { value: line, animated, index: animated ? animatedIndex++ : -1 };
+          });
+        }
+        if (splitBy === 'characters') {
+          return splitIntoGraphemes(text).map((character) => {
+            const animated = !/\s/.test(character);
+            return { value: character, animated, index: animated ? animatedIndex++ : -1 };
+          });
+        }
+        // Default: words
+        return text.split(/(\s+)/).map((part) => {
+          const animated = !/^\s+$/.test(part) && part.length > 0;
+          return { value: part, animated, index: animated ? animatedIndex++ : -1 };
+        });
+      }
+
+      function getKineticDelay(index, total, stagger, staggerFrom) {
+        if (typeof staggerFrom === 'number') {
+          return Math.abs(staggerFrom - index) * stagger;
+        }
+        if (staggerFrom === 'end') {
+          return (total - 1 - index) * stagger;
+        }
+        if (staggerFrom === 'center') {
+          return Math.abs((total - 1) / 2 - index) * stagger;
+        }
+        if (staggerFrom === 'edges') {
+          return Math.min(index, total - 1 - index) * stagger;
+        }
+        if (staggerFrom === 'random') {
+          const seeded = Math.abs(Math.sin(index * 12.9898) * 43758.5453) % 1;
+          return Math.floor(seeded * total) * stagger;
+        }
+        return index * stagger;
+      }
+
+      function getKineticOffset(direction, distance) {
+        if (direction === 'down') return { x: 0, y: -distance };
+        if (direction === 'left') return { x: distance, y: 0 };
+        if (direction === 'right') return { x: -distance, y: 0 };
+        return { x: 0, y: distance };
+      }
+
+      function initKineticTextReveal(el, options = {}) {
         if (!el) return null;
 
         const {
           text = el.getAttribute('data-text') || el.textContent.trim(),
-          delay = 50,
-          duration = 1.25,
-          ease = 'power3.out',
-          splitType = 'chars',
-          from = { opacity: 0, y: 40 },
-          to = { opacity: 1, y: 0 },
-          threshold = 0.1,
-          rootMargin = '-100px',
+          splitBy = 'words',
+          direction = 'up',
+          distance = 24,
+          stagger = 0.08,
+          staggerFrom = 'start',
+          duration = 0.72,
+          blur = true,
+          autoPlay = true,
+          delay = 0,
           textAlign = 'center',
-          onLetterAnimationComplete,
-          useScrollTrigger = false,
-          delayStart = 0
+          segmentClassName = '',
+          maskClassName = '',
+          onRevealStart,
+          onRevealComplete
         } = options;
 
-        // Clean up previous instance if any
-        if (el._rbsplitInstance) {
+        if (el._kineticInstance) {
           try {
-            if (el._rbsplitInstance.tween) el._rbsplitInstance.tween.kill();
-            if (el._rbsplitInstance.st) el._rbsplitInstance.st.kill();
-          } catch (_) {
-            /* noop */
-          }
-          el._rbsplitInstance = null;
+            el._kineticInstance.reset();
+          } catch (_) { }
+          el._kineticInstance = null;
         }
 
-        // Apply container styles & classes matching renderTag
-        el.className = `split-parent ${el.classList.contains('highlight') ? 'highlight' : ''}`;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const segments = getKineticSegments(text, splitBy);
+        const animatedTotal = segments.filter(s => s.animated).length;
+        const offset = getKineticOffset(direction, distance);
+
+        el.setAttribute('aria-label', text);
         el.style.textAlign = textAlign;
-        el.style.overflow = 'hidden';
-        el.style.display = 'inline-block';
-        el.style.whiteSpace = 'normal';
-        el.style.wordWrap = 'break-word';
-        el.style.willChange = 'transform, opacity';
-
-        // Split text into words and chars
         el.innerHTML = '';
-        const words = text.split(/\s+/).filter(Boolean);
-        const chars = [];
-        const wordEls = [];
 
-        words.forEach((word, wordIdx) => {
-          const wordSpan = document.createElement('span');
-          wordSpan.className = 'split-word';
+        const srOnly = document.createElement('span');
+        srOnly.className = 'sr-only';
+        srOnly.textContent = text;
+        el.appendChild(srOnly);
 
-          word.split('').forEach(char => {
-            const charSpan = document.createElement('span');
-            charSpan.className = 'split-char';
-            charSpan.textContent = char;
-            wordSpan.appendChild(charSpan);
-            chars.push(charSpan);
-          });
+        const segmentNodes = [];
 
-          el.appendChild(wordSpan);
-          wordEls.push(wordSpan);
-
-          if (wordIdx < words.length - 1) {
-            const spaceSpan = document.createElement('span');
-            spaceSpan.className = 'split-space';
-            spaceSpan.innerHTML = '&nbsp;';
-            el.appendChild(spaceSpan);
-          }
-        });
-
-        // Determine targets based on splitType
-        let targets = chars;
-        if (splitType.includes('chars') && chars.length) targets = chars;
-        else if (splitType.includes('words') && wordEls.length) targets = wordEls;
-
-        // Calculate ScrollTrigger start
-        const startPct = (1 - threshold) * 100;
-        const marginMatch = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin);
-        const marginValue = marginMatch ? parseFloat(marginMatch[1]) : 0;
-        const marginUnit = marginMatch ? marginMatch[2] || 'px' : 'px';
-        const sign =
-          marginValue === 0
-            ? ''
-            : marginValue < 0
-              ? `-=${Math.abs(marginValue)}${marginUnit}`
-              : `+=${marginValue}${marginUnit}`;
-        const start = `top ${startPct}%${sign}`;
-
-        const runAnimation = () => {
-          if (!window.gsap) {
-            targets.forEach(t => { t.style.opacity = 1; t.style.transform = 'none'; });
+        segments.forEach((segment) => {
+          if (!segment.animated) {
+            const plain = document.createElement('span');
+            plain.setAttribute('aria-hidden', 'true');
+            plain.textContent = segment.value;
+            el.appendChild(plain);
             return;
           }
 
-          const tweenConfig = {
-            ...to,
-            duration,
-            ease,
-            stagger: delay / 1000,
-            delay: delayStart,
-            willChange: 'transform, opacity',
-            force3D: true,
-            onComplete: () => {
-              if (typeof onLetterAnimationComplete === 'function') {
-                onLetterAnimationComplete();
-              }
-            }
-          };
+          const mask = document.createElement('span');
+          mask.className = `kinetic-mask ${maskClassName}`.trim();
+          mask.setAttribute('aria-hidden', 'true');
 
-          let scrollTriggerInstance = null;
-          if (useScrollTrigger && window.ScrollTrigger) {
-            tweenConfig.scrollTrigger = {
-              trigger: el,
-              start,
-              once: true,
-              fastScrollEnd: true,
-              anticipatePin: 0.4
-            };
+          const seg = document.createElement('span');
+          seg.className = `kinetic-segment ${segmentClassName}`.trim();
+          seg.textContent = segment.value;
+
+          mask.appendChild(seg);
+          el.appendChild(mask);
+
+          segmentNodes.push({
+            node: seg,
+            index: segment.index
+          });
+        });
+
+        const reset = () => {
+          segmentNodes.forEach(({ node }) => {
+            if (window.gsap) gsap.killTweensOf(node);
+            if (reduceMotion) {
+              node.style.opacity = '0';
+            } else {
+              node.style.opacity = '0';
+              node.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`;
+              node.style.filter = blur ? 'blur(6px)' : 'none';
+            }
+          });
+        };
+
+        const play = () => {
+          reset();
+          if (typeof onRevealStart === 'function') onRevealStart();
+
+          if (reduceMotion) {
+            segmentNodes.forEach(({ node }) => { node.style.opacity = '1'; });
+            if (typeof onRevealComplete === 'function') onRevealComplete();
+            return;
           }
 
-          const tween = gsap.fromTo(targets, { ...from }, tweenConfig);
-          if (tweenConfig.scrollTrigger && tween.scrollTrigger) {
-            scrollTriggerInstance = tween.scrollTrigger;
+          if (window.gsap) {
+            segmentNodes.forEach(({ node, index }) => {
+              const segDelay = delay + getKineticDelay(index, animatedTotal, stagger, staggerFrom);
+              gsap.fromTo(node,
+                {
+                  opacity: 0,
+                  x: offset.x,
+                  y: offset.y,
+                  filter: blur ? 'blur(6px)' : 'blur(0px)'
+                },
+                {
+                  opacity: 1,
+                  x: 0,
+                  y: 0,
+                  filter: 'blur(0px)',
+                  duration,
+                  ease: 'power3.out',
+                  delay: segDelay,
+                  force3D: true,
+                  onComplete: index === animatedTotal - 1 ? onRevealComplete : undefined
+                }
+              );
+            });
+          } else {
+            segmentNodes.forEach(({ node, index }) => {
+              const segDelay = (delay + getKineticDelay(index, animatedTotal, stagger, staggerFrom)) * 1000;
+              setTimeout(() => {
+                node.style.transition = `opacity ${duration}s cubic-bezier(0.22, 1, 0.36, 1), transform ${duration}s cubic-bezier(0.22, 1, 0.36, 1), filter ${duration}s cubic-bezier(0.22, 1, 0.36, 1)`;
+                node.style.opacity = '1';
+                node.style.transform = 'translate3d(0, 0, 0)';
+                node.style.filter = 'blur(0px)';
+                if (index === animatedTotal - 1 && typeof onRevealComplete === 'function') {
+                  setTimeout(onRevealComplete, duration * 1000);
+                }
+              }, segDelay);
+            });
           }
+        };
 
-          el._rbsplitInstance = {
-            tween,
-            st: scrollTriggerInstance,
-            revert: () => {
-              try {
-                if (scrollTriggerInstance) scrollTriggerInstance.kill();
-                tween.kill();
-              } catch (_) { }
-              el.textContent = text;
-            }
-          };
+        reset();
+
+        const runAnimation = () => {
+          if (autoPlay) play();
         };
 
         if (document.fonts && document.fonts.status !== 'loaded' && document.fonts.ready) {
@@ -12879,19 +13127,22 @@ gsap/CSSPlugin.js:
           runAnimation();
         }
 
-        return el._rbsplitInstance;
+        const instance = { play, reset };
+        el._kineticInstance = instance;
+        return instance;
       }
 
-      // ── Animate splash title immediately on load ──
+      // ── Animate splash title immediately on load with Kinetic Text Reveal ──
       const splashTitleEl = document.getElementById('splashSplitText');
       if (splashTitleEl) {
-        initSplitText(splashTitleEl, {
-          delay: 50,
-          duration: 1.25,
-          ease: 'power3.out',
-          splitType: 'chars',
-          from: { opacity: 0, y: 40 },
-          to: { opacity: 1, y: 0 },
+        initKineticTextReveal(splashTitleEl, {
+          splitBy: 'words',
+          direction: 'up',
+          distance: 24,
+          stagger: 0.08,
+          duration: 0.72,
+          blur: true,
+          delay: 0.1,
           textAlign: 'center'
         });
       }
@@ -12902,27 +13153,27 @@ gsap/CSSPlugin.js:
         const heroLine2 = document.getElementById('heroSplitText2');
 
         if (heroLine1) {
-          initSplitText(heroLine1, {
-            delay: 45,
-            duration: 1.25,
-            ease: 'power3.out',
-            splitType: 'chars',
-            from: { opacity: 0, y: 40 },
-            to: { opacity: 1, y: 0 },
+          initKineticTextReveal(heroLine1, {
+            splitBy: 'words',
+            direction: 'up',
+            distance: 24,
+            stagger: 0.08,
+            duration: 0.72,
+            blur: true,
+            delay: 0.05,
             textAlign: 'center'
           });
         }
 
         if (heroLine2) {
-          const l1Len = heroLine1 ? (heroLine1.getAttribute('data-text') || '').replace(/\s/g, '').length : 14;
-          initSplitText(heroLine2, {
-            delay: 45,
-            duration: 1.25,
-            ease: 'power3.out',
-            splitType: 'chars',
-            from: { opacity: 0, y: 40 },
-            to: { opacity: 1, y: 0 },
-            delayStart: 0.045 * Math.min(l1Len, 10),
+          initKineticTextReveal(heroLine2, {
+            splitBy: 'words',
+            direction: 'up',
+            distance: 24,
+            stagger: 0.08,
+            duration: 0.72,
+            blur: true,
+            delay: 0.22,
             textAlign: 'center'
           });
         }

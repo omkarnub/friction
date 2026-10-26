@@ -1399,6 +1399,12 @@
       };
       slider._updateFill = updateFillAndRatio;
 
+      function getClientX(e) {
+        if (e.touches && e.touches.length > 0) return e.touches[0].clientX;
+        if (e.changedTouches && e.changedTouches.length > 0) return e.changedTouches[0].clientX;
+        return e.clientX;
+      }
+
       // Track tap prevention:
       // If user taps in between the slider line (not on the thumb), prevent movement!
       function handlePointerDown(e) {
@@ -1410,11 +1416,14 @@
 
         const thumbWidth = 22;
         const thumbCenterX = rect.left + (thumbWidth / 2) + ratio * (rect.width - thumbWidth);
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientX = getClientX(e);
+        if (clientX === undefined) return;
         const dist = Math.abs(clientX - thumbCenterX);
 
-        // Thumb diameter is 22px (radius 11px). 22px hit radius gives a comfortable 44px touch target.
-        if (dist > 22) {
+        // Thumb diameter is 22px (radius 11px). 
+        // 22px for mouse, 26px for finger touch to ensure effortless touch grab.
+        const hitRadius = (e.type.startsWith('touch') || (e.pointerType && e.pointerType === 'touch')) ? 26 : 22;
+        if (dist > hitRadius) {
           e.preventDefault();
           e.stopPropagation();
           return;
@@ -1425,6 +1434,34 @@
         startVal = parseFloat(slider.value) || 0;
         if (hideTimeout) clearTimeout(hideTimeout);
         showProgression(0, startVal);
+      }
+
+      function handleDragMove(e) {
+        if (!isDragging) return;
+        const clientX = getClientX(e);
+        if (clientX === undefined) return;
+
+        const rect = slider.getBoundingClientRect();
+        const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
+        const max = parseFloat(slider.max) !== undefined ? parseFloat(slider.max) : 100;
+        const step = parseFloat(slider.step) || 0.1;
+        const thumbWidth = 22;
+        const trackWidth = rect.width - thumbWidth;
+        if (trackWidth <= 0) return;
+
+        const relX = clientX - (rect.left + thumbWidth / 2);
+        const ratio = Math.max(0, Math.min(1, relX / trackWidth));
+        const rawVal = min + ratio * (max - min);
+
+        const stepDecimals = (step.toString().split('.')[1] || '').length;
+        let steppedVal = Math.round((rawVal - min) / step) * step + min;
+        steppedVal = Math.max(min, Math.min(max, steppedVal));
+        steppedVal = parseFloat(steppedVal.toFixed(Math.max(1, stepDecimals)));
+
+        if (parseFloat(slider.value) !== steppedVal) {
+          slider.value = steppedVal;
+          slider.dispatchEvent(new Event('input', { bubbles: true }));
+        }
       }
 
       slider.addEventListener('pointerdown', handlePointerDown, { passive: false });
@@ -1445,9 +1482,14 @@
         }
       }
 
+      window.addEventListener('pointermove', handleDragMove, { passive: true });
+      window.addEventListener('touchmove', handleDragMove, { passive: true });
+      window.addEventListener('mousemove', handleDragMove, { passive: true });
+
       window.addEventListener('pointerup', handleDragEnd);
       window.addEventListener('pointercancel', handleDragEnd);
       window.addEventListener('touchend', handleDragEnd);
+      window.addEventListener('touchcancel', handleDragEnd);
       window.addEventListener('mouseup', handleDragEnd);
     });
   }

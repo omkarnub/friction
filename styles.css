@@ -1756,16 +1756,46 @@ td.invalid {
   color: inherit;
 }
 
-/* ── SplitText GSAP Animation ── */
+/* ── Kokonut UI — Kinetic Text Reveal ── */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.kinetic-reveal,
 .split-parent {
   text-align: inherit;
-  overflow: hidden;
-  display: inline-block;
-  white-space: normal;
-  word-wrap: break-word;
-  will-change: transform, opacity;
+  display: inline-flex;
+  flex-wrap: wrap;
+  white-space: pre-wrap;
+  align-items: baseline;
+  justify-content: center;
+  max-width: 100%;
+  vertical-align: baseline;
   background: none !important;
   -webkit-text-fill-color: unset !important;
+}
+
+.kinetic-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: baseline;
+  padding-bottom: 0.08em;
+  line-height: inherit;
+}
+
+.kinetic-segment {
+  display: inline-block;
+  vertical-align: baseline;
+  will-change: transform, opacity, filter;
+  color: inherit;
 }
 
 .split-line {
@@ -1999,10 +2029,11 @@ td.invalid {
   letter-spacing: -0.01em;
 }
 
-.scroll-reveal-text .sr-word {
-  display: inline-block;
-  opacity: 0.12;
-  filter: blur(4px);
+.scroll-reveal-text .sr-word,
+.sr-word {
+  display: inline;
+  opacity: 1;
+  filter: none;
 }
 
 /* ── Learning points ── */
@@ -2243,7 +2274,7 @@ td.invalid {
 
 /* ── Scroll Spacer ── */
 .learn-scroll-spacer {
-  height: clamp(15rem, 30vh, 25rem);
+  height: clamp(2rem, 4vh, 3.5rem);
   pointer-events: none;
 }
 
@@ -2534,7 +2565,7 @@ td.invalid {
 .slider-progress-display {
   position: absolute;
   bottom: calc(100% + 9px);
-  left: calc(11px + (100% - 22px) * var(--thumb-ratio, 0));
+  left: clamp(38px, calc(11px + (100% - 22px) * var(--thumb-ratio, 0)), calc(100% - 38px));
   transform: translateX(-50%) translateY(4px) scale(0.92);
   display: inline-flex;
   align-items: center;
@@ -4261,7 +4292,7 @@ td.invalid {
     will-change: transform;
   }
 
-  /* On mobile: no text scroll animation, text is fully clear and visible */
+  /* Text is fully clear and visible without scroll animation */
   .sr-word,
   .scroll-reveal-text .sr-word,
   .learn-point-title .sr-word,
@@ -4887,4 +4918,200 @@ html.theme-transitioning *::after {
 .manual-view-mobile .manual-img-wrap {
   max-width: 380px;
   margin: 0 auto;
+}
+
+/* ===================================================================
+   Kokonut UI — Scroll Index
+   =================================================================== */
+.scroll-index-nav {
+  position: fixed;
+  right: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.scroll-index-nav.visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+.scroll-index-rail {
+  position: relative;
+  width: 44px;
+  height: 280px;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+}
+
+.scroll-index-rail[data-dragging] {
+  cursor: grabbing;
+}
+
+.scroll-index-tick {
+  position: absolute;
+  right: 0;
+  height: 16px;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.scroll-index-tick.major {
+  width: 15px;
+}
+
+.scroll-index-tick.minor {
+  width: 9px;
+}
+
+.scroll-index-tick:focus-visible .scroll-index-bar {
+  outline: 2px solid var(--accent-cyan);
+  outline-offset: 2px;
+}
+
+.scroll-index-bar {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  height: 1.5px;
+  width: 100%;
+  transform-origin: right center;
+  transform: translateY(-50%) scaleX(var(--swell, 1));
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.22);
+  transition: background-color 0.2s ease-out, transform 0.1s ease-out;
+}
+
+.scroll-index-tick[data-state="passed"] .scroll-index-bar {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.scroll-index-tick[data-state="current"] .scroll-index-bar {
+  background: #00e5ff;
+  height: 2px;
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.7);
+}
+
+.scroll-index-head {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 2.5px;
+  width: 24px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: #ffffff;
+  will-change: transform;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  transition: transform 0.05s linear;
+}
+
+.scroll-index-label {
+  position: absolute;
+  top: 0;
+  right: 48px;
+  white-space: nowrap;
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-family: var(--font-body);
+  background: rgba(18, 18, 18, 0.94);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f5f5f5;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5), 0 0 8px rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate3d(0, 0, 0) translateY(-50%);
+  transition: opacity 0.15s ease-out, transform 0.15s ease-out;
+  z-index: 95;
+}
+
+/* Light theme support */
+[data-theme="light"] .scroll-index-bar {
+  background: rgba(40, 35, 30, 0.22);
+}
+
+[data-theme="light"] .scroll-index-tick[data-state="passed"] .scroll-index-bar {
+  background: rgba(40, 35, 30, 0.7);
+}
+
+[data-theme="light"] .scroll-index-tick[data-state="current"] .scroll-index-bar {
+  background: #0077aa;
+  box-shadow: 0 0 8px rgba(0, 119, 170, 0.5);
+}
+
+[data-theme="light"] .scroll-index-head {
+  background: #121212;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="light"] .scroll-index-label {
+  background: rgba(255, 255, 255, 0.96);
+  border-color: rgba(50, 40, 30, 0.2);
+  color: #121212;
+  box-shadow: 0 4px 14px rgba(45, 35, 25, 0.12);
+}
+
+@media (max-width: 1024px) {
+  .scroll-index-nav {
+    right: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .scroll-index-nav {
+    right: 14px;
+    z-index: 95;
+  }
+
+  .scroll-index-rail {
+    width: 36px;
+    height: 260px;
+  }
+
+  .scroll-index-label {
+    right: 42px;
+    max-width: calc(100vw - 70px);
+    font-size: 0.72rem;
+    padding: 3px 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media (max-width: 420px) {
+  .scroll-index-nav {
+    right: 10px;
+  }
+
+  .scroll-index-rail {
+    width: 32px;
+    height: 240px;
+  }
+
+  .scroll-index-label {
+    right: 36px;
+    max-width: calc(100vw - 55px);
+  }
 }

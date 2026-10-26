@@ -531,109 +531,26 @@
 
 
   /* ================================================================
-     PART 2 — Scroll Reveal (Word-by-word blur + opacity on scroll)
+     PART 2 — Scroll Reveal (Disabled: text is clean, static, 100% visible)
      ================================================================ */
   let scrollRevealInitialized = false;
 
   function initScrollReveal() {
+    // Clean, static, 100% visible text with no scroll animation across all devices
     const textEls = document.querySelectorAll('[data-sr-text]');
-    const isMobile = window.innerWidth <= 768;
-
-    if (isMobile) {
-      // Mobile platform: No text scroll animation at all — clean, static, 100% smooth scrolling
-      textEls.forEach(el => {
-        el.style.opacity = '1';
-        el.style.filter = 'none';
-        el.querySelectorAll('.sr-word').forEach(span => {
-          span.style.opacity = '1';
-          span.style.filter = 'none';
-          span.style.transform = 'none';
-        });
-      });
-      document.querySelectorAll('.learn-point-number').forEach(el => {
-        el.style.opacity = '0.4';
-        el.style.transform = 'none';
-      });
-      return;
-    }
-
-    // Desktop platform: Original word-by-word blur-to-clear + opacity scroll reveal animation
-    if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') return;
-    gsap.registerPlugin(ScrollTrigger);
-
     textEls.forEach(el => {
-      let wordSpans = el.querySelectorAll('.sr-word');
-      if (!wordSpans.length) {
-        const raw = el.textContent.trim();
-        if (!raw) return;
-
-        el.innerHTML = '';
-        const words = raw.split(/\s+/);
-        words.forEach((word, i) => {
-          const span = document.createElement('span');
-          span.className = 'sr-word';
-          span.textContent = word;
-          el.appendChild(span);
-          if (i < words.length - 1) {
-            el.appendChild(document.createTextNode(' '));
-          }
-        });
-        wordSpans = el.querySelectorAll('.sr-word');
-      }
-
-      if (!wordSpans.length) return;
-
-      // Base opacity animation
-      gsap.fromTo(wordSpans,
-        { opacity: 0.12 },
-        {
-          opacity: 1,
-          ease: 'none',
-          stagger: 0.05,
-          scrollTrigger: {
-            trigger: el,
-            start: 'top bottom-=15%',
-            end: 'top center-=10%',
-            scrub: true,
-          }
-        }
-      );
-
-      // Blur animation
-      gsap.fromTo(wordSpans,
-        { filter: 'blur(4px)' },
-        {
-          filter: 'blur(0px)',
-          ease: 'none',
-          stagger: 0.05,
-          scrollTrigger: {
-            trigger: el,
-            start: 'top bottom-=15%',
-            end: 'top center-=10%',
-            scrub: true,
-          }
-        }
-      );
+      el.style.opacity = '1';
+      el.style.filter = 'none';
+      el.querySelectorAll('.sr-word').forEach(span => {
+        span.style.opacity = '1';
+        span.style.filter = 'none';
+        span.style.transform = 'none';
+      });
     });
-
-    // Also animate the learn-point-number elements on desktop
     document.querySelectorAll('.learn-point-number').forEach(el => {
-      gsap.fromTo(el,
-        { opacity: 0.1, y: 20 },
-        {
-          opacity: 0.4,
-          y: 0,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: el.closest('.learn-point') || el.closest('.learn-method-header'),
-            start: 'top bottom-=10%',
-            end: 'top center',
-            scrub: true,
-          }
-        }
-      );
+      el.style.opacity = '0.4';
+      el.style.transform = 'none';
     });
-
     scrollRevealInitialized = true;
   }
 

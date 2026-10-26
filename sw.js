@@ -1,4 +1,4 @@
-const CACHE = "mech-lab-v2";
+const CACHE = "mech-lab-v8";
 
 const CORE_ASSETS = [
   "./",
@@ -14,6 +14,7 @@ const CORE_ASSETS = [
   "./js/theory.js",
   "./js/pdf-export.js",
   "./js/home-showcase.js",
+  "./js/scroll-index.js",
   "./js/get-started-bg.js",
   "./js/gsap.min.js",
   "./js/ScrollTrigger.min.js",

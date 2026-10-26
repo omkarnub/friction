@@ -15,7 +15,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Anton&family=Google+Sans+Flex:opsz,wght@6..144,1..1000&family=Lexend:wght@100..900&family=Outfit:wght@100..900&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=22">
+  <link rel="stylesheet" href="styles.css?v=27">
   <link rel="stylesheet" href="StaggeredMenu.css?v=2">
 
   <!-- PWA: Add to Home Screen support -->
@@ -2373,7 +2373,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="js/gsap.min.js?v=2"></script>
   <script src="js/ScrollTrigger.min.js?v=2"></script>
-  <script src="js/home-showcase.js?v=4"></script>
+  <script src="js/home-showcase.js?v=5"></script>
+  <script src="js/scroll-index.js?v=4"></script>
   <script src="js/theory.js?v=2"></script>
   <script src="js/simulate.js?v=18"></script>
   <script src="js/haptics.js?v=1"></script>
@@ -2661,140 +2662,202 @@
         gsap.registerPlugin(ScrollTrigger);
       }
 
-      function initSplitText(el, options = {}) {
+      // ══════════════════════════════════════════════════════════════
+      // Kokonut UI — Kinetic Text Reveal (Vanilla JS / GSAP)
+      // Adapted from KineticTextReveal by @dorianbaffier
+      // ══════════════════════════════════════════════════════════════
+      function splitIntoGraphemes(value) {
+        if (typeof Intl !== 'undefined' && 'Segmenter' in Intl) {
+          const segmenter = new Intl.Segmenter('en', { granularity: 'grapheme' });
+          return Array.from(segmenter.segment(value), ({ segment }) => segment);
+        }
+        return Array.from(value);
+      }
+
+      function getKineticSegments(text, splitBy) {
+        let animatedIndex = 0;
+        if (splitBy === 'lines') {
+          return text.split('\n').map((line) => {
+            const animated = line.length > 0;
+            return { value: line, animated, index: animated ? animatedIndex++ : -1 };
+          });
+        }
+        if (splitBy === 'characters') {
+          return splitIntoGraphemes(text).map((character) => {
+            const animated = !/\s/.test(character);
+            return { value: character, animated, index: animated ? animatedIndex++ : -1 };
+          });
+        }
+        // Default: words
+        return text.split(/(\s+)/).map((part) => {
+          const animated = !/^\s+$/.test(part) && part.length > 0;
+          return { value: part, animated, index: animated ? animatedIndex++ : -1 };
+        });
+      }
+
+      function getKineticDelay(index, total, stagger, staggerFrom) {
+        if (typeof staggerFrom === 'number') {
+          return Math.abs(staggerFrom - index) * stagger;
+        }
+        if (staggerFrom === 'end') {
+          return (total - 1 - index) * stagger;
+        }
+        if (staggerFrom === 'center') {
+          return Math.abs((total - 1) / 2 - index) * stagger;
+        }
+        if (staggerFrom === 'edges') {
+          return Math.min(index, total - 1 - index) * stagger;
+        }
+        if (staggerFrom === 'random') {
+          const seeded = Math.abs(Math.sin(index * 12.9898) * 43758.5453) % 1;
+          return Math.floor(seeded * total) * stagger;
+        }
+        return index * stagger;
+      }
+
+      function getKineticOffset(direction, distance) {
+        if (direction === 'down') return { x: 0, y: -distance };
+        if (direction === 'left') return { x: distance, y: 0 };
+        if (direction === 'right') return { x: -distance, y: 0 };
+        return { x: 0, y: distance };
+      }
+
+      function initKineticTextReveal(el, options = {}) {
         if (!el) return null;
 
         const {
           text = el.getAttribute('data-text') || el.textContent.trim(),
-          delay = 50,
-          duration = 1.25,
-          ease = 'power3.out',
-          splitType = 'chars',
-          from = { opacity: 0, y: 40 },
-          to = { opacity: 1, y: 0 },
-          threshold = 0.1,
-          rootMargin = '-100px',
+          splitBy = 'words',
+          direction = 'up',
+          distance = 24,
+          stagger = 0.08,
+          staggerFrom = 'start',
+          duration = 0.72,
+          blur = true,
+          autoPlay = true,
+          delay = 0,
           textAlign = 'center',
-          onLetterAnimationComplete,
-          useScrollTrigger = false,
-          delayStart = 0
+          segmentClassName = '',
+          maskClassName = '',
+          onRevealStart,
+          onRevealComplete
         } = options;
 
-        // Clean up previous instance if any
-        if (el._rbsplitInstance) {
+        if (el._kineticInstance) {
           try {
-            if (el._rbsplitInstance.tween) el._rbsplitInstance.tween.kill();
-            if (el._rbsplitInstance.st) el._rbsplitInstance.st.kill();
-          } catch (_) {
-            /* noop */
-          }
-          el._rbsplitInstance = null;
+            el._kineticInstance.reset();
+          } catch (_) { }
+          el._kineticInstance = null;
         }
 
-        // Apply container styles & classes matching renderTag
-        el.className = `split-parent ${el.classList.contains('highlight') ? 'highlight' : ''}`;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const segments = getKineticSegments(text, splitBy);
+        const animatedTotal = segments.filter(s => s.animated).length;
+        const offset = getKineticOffset(direction, distance);
+
+        el.setAttribute('aria-label', text);
         el.style.textAlign = textAlign;
-        el.style.overflow = 'hidden';
-        el.style.display = 'inline-block';
-        el.style.whiteSpace = 'normal';
-        el.style.wordWrap = 'break-word';
-        el.style.willChange = 'transform, opacity';
-
-        // Split text into words and chars
         el.innerHTML = '';
-        const words = text.split(/\s+/).filter(Boolean);
-        const chars = [];
-        const wordEls = [];
 
-        words.forEach((word, wordIdx) => {
-          const wordSpan = document.createElement('span');
-          wordSpan.className = 'split-word';
+        const srOnly = document.createElement('span');
+        srOnly.className = 'sr-only';
+        srOnly.textContent = text;
+        el.appendChild(srOnly);
 
-          word.split('').forEach(char => {
-            const charSpan = document.createElement('span');
-            charSpan.className = 'split-char';
-            charSpan.textContent = char;
-            wordSpan.appendChild(charSpan);
-            chars.push(charSpan);
-          });
+        const segmentNodes = [];
 
-          el.appendChild(wordSpan);
-          wordEls.push(wordSpan);
-
-          if (wordIdx < words.length - 1) {
-            const spaceSpan = document.createElement('span');
-            spaceSpan.className = 'split-space';
-            spaceSpan.innerHTML = '&nbsp;';
-            el.appendChild(spaceSpan);
-          }
-        });
-
-        // Determine targets based on splitType
-        let targets = chars;
-        if (splitType.includes('chars') && chars.length) targets = chars;
-        else if (splitType.includes('words') && wordEls.length) targets = wordEls;
-
-        // Calculate ScrollTrigger start
-        const startPct = (1 - threshold) * 100;
-        const marginMatch = /^(-?\d+(?:\.\d+)?)(px|em|rem|%)?$/.exec(rootMargin);
-        const marginValue = marginMatch ? parseFloat(marginMatch[1]) : 0;
-        const marginUnit = marginMatch ? marginMatch[2] || 'px' : 'px';
-        const sign =
-          marginValue === 0
-            ? ''
-            : marginValue < 0
-              ? `-=${Math.abs(marginValue)}${marginUnit}`
-              : `+=${marginValue}${marginUnit}`;
-        const start = `top ${startPct}%${sign}`;
-
-        const runAnimation = () => {
-          if (!window.gsap) {
-            targets.forEach(t => { t.style.opacity = 1; t.style.transform = 'none'; });
+        segments.forEach((segment) => {
+          if (!segment.animated) {
+            const plain = document.createElement('span');
+            plain.setAttribute('aria-hidden', 'true');
+            plain.textContent = segment.value;
+            el.appendChild(plain);
             return;
           }
 
-          const tweenConfig = {
-            ...to,
-            duration,
-            ease,
-            stagger: delay / 1000,
-            delay: delayStart,
-            willChange: 'transform, opacity',
-            force3D: true,
-            onComplete: () => {
-              if (typeof onLetterAnimationComplete === 'function') {
-                onLetterAnimationComplete();
-              }
-            }
-          };
+          const mask = document.createElement('span');
+          mask.className = `kinetic-mask ${maskClassName}`.trim();
+          mask.setAttribute('aria-hidden', 'true');
 
-          let scrollTriggerInstance = null;
-          if (useScrollTrigger && window.ScrollTrigger) {
-            tweenConfig.scrollTrigger = {
-              trigger: el,
-              start,
-              once: true,
-              fastScrollEnd: true,
-              anticipatePin: 0.4
-            };
+          const seg = document.createElement('span');
+          seg.className = `kinetic-segment ${segmentClassName}`.trim();
+          seg.textContent = segment.value;
+
+          mask.appendChild(seg);
+          el.appendChild(mask);
+
+          segmentNodes.push({
+            node: seg,
+            index: segment.index
+          });
+        });
+
+        const reset = () => {
+          segmentNodes.forEach(({ node }) => {
+            if (window.gsap) gsap.killTweensOf(node);
+            if (reduceMotion) {
+              node.style.opacity = '0';
+            } else {
+              node.style.opacity = '0';
+              node.style.transform = `translate3d(${offset.x}px, ${offset.y}px, 0)`;
+              node.style.filter = blur ? 'blur(6px)' : 'none';
+            }
+          });
+        };
+
+        const play = () => {
+          reset();
+          if (typeof onRevealStart === 'function') onRevealStart();
+
+          if (reduceMotion) {
+            segmentNodes.forEach(({ node }) => { node.style.opacity = '1'; });
+            if (typeof onRevealComplete === 'function') onRevealComplete();
+            return;
           }
 
-          const tween = gsap.fromTo(targets, { ...from }, tweenConfig);
-          if (tweenConfig.scrollTrigger && tween.scrollTrigger) {
-            scrollTriggerInstance = tween.scrollTrigger;
+          if (window.gsap) {
+            segmentNodes.forEach(({ node, index }) => {
+              const segDelay = delay + getKineticDelay(index, animatedTotal, stagger, staggerFrom);
+              gsap.fromTo(node,
+                {
+                  opacity: 0,
+                  x: offset.x,
+                  y: offset.y,
+                  filter: blur ? 'blur(6px)' : 'blur(0px)'
+                },
+                {
+                  opacity: 1,
+                  x: 0,
+                  y: 0,
+                  filter: 'blur(0px)',
+                  duration,
+                  ease: 'power3.out',
+                  delay: segDelay,
+                  force3D: true,
+                  onComplete: index === animatedTotal - 1 ? onRevealComplete : undefined
+                }
+              );
+            });
+          } else {
+            segmentNodes.forEach(({ node, index }) => {
+              const segDelay = (delay + getKineticDelay(index, animatedTotal, stagger, staggerFrom)) * 1000;
+              setTimeout(() => {
+                node.style.transition = `opacity ${duration}s cubic-bezier(0.22, 1, 0.36, 1), transform ${duration}s cubic-bezier(0.22, 1, 0.36, 1), filter ${duration}s cubic-bezier(0.22, 1, 0.36, 1)`;
+                node.style.opacity = '1';
+                node.style.transform = 'translate3d(0, 0, 0)';
+                node.style.filter = 'blur(0px)';
+                if (index === animatedTotal - 1 && typeof onRevealComplete === 'function') {
+                  setTimeout(onRevealComplete, duration * 1000);
+                }
+              }, segDelay);
+            });
           }
+        };
 
-          el._rbsplitInstance = {
-            tween,
-            st: scrollTriggerInstance,
-            revert: () => {
-              try {
-                if (scrollTriggerInstance) scrollTriggerInstance.kill();
-                tween.kill();
-              } catch (_) { }
-              el.textContent = text;
-            }
-          };
+        reset();
+
+        const runAnimation = () => {
+          if (autoPlay) play();
         };
 
         if (document.fonts && document.fonts.status !== 'loaded' && document.fonts.ready) {
@@ -2803,19 +2866,22 @@
           runAnimation();
         }
 
-        return el._rbsplitInstance;
+        const instance = { play, reset };
+        el._kineticInstance = instance;
+        return instance;
       }
 
-      // ── Animate splash title immediately on load ──
+      // ── Animate splash title immediately on load with Kinetic Text Reveal ──
       const splashTitleEl = document.getElementById('splashSplitText');
       if (splashTitleEl) {
-        initSplitText(splashTitleEl, {
-          delay: 50,
-          duration: 1.25,
-          ease: 'power3.out',
-          splitType: 'chars',
-          from: { opacity: 0, y: 40 },
-          to: { opacity: 1, y: 0 },
+        initKineticTextReveal(splashTitleEl, {
+          splitBy: 'words',
+          direction: 'up',
+          distance: 24,
+          stagger: 0.08,
+          duration: 0.72,
+          blur: true,
+          delay: 0.1,
           textAlign: 'center'
         });
       }
@@ -2826,27 +2892,27 @@
         const heroLine2 = document.getElementById('heroSplitText2');
 
         if (heroLine1) {
-          initSplitText(heroLine1, {
-            delay: 45,
-            duration: 1.25,
-            ease: 'power3.out',
-            splitType: 'chars',
-            from: { opacity: 0, y: 40 },
-            to: { opacity: 1, y: 0 },
+          initKineticTextReveal(heroLine1, {
+            splitBy: 'words',
+            direction: 'up',
+            distance: 24,
+            stagger: 0.08,
+            duration: 0.72,
+            blur: true,
+            delay: 0.05,
             textAlign: 'center'
           });
         }
 
         if (heroLine2) {
-          const l1Len = heroLine1 ? (heroLine1.getAttribute('data-text') || '').replace(/\s/g, '').length : 14;
-          initSplitText(heroLine2, {
-            delay: 45,
-            duration: 1.25,
-            ease: 'power3.out',
-            splitType: 'chars',
-            from: { opacity: 0, y: 40 },
-            to: { opacity: 1, y: 0 },
-            delayStart: 0.045 * Math.min(l1Len, 10),
+          initKineticTextReveal(heroLine2, {
+            splitBy: 'words',
+            direction: 'up',
+            distance: 24,
+            stagger: 0.08,
+            duration: 0.72,
+            blur: true,
+            delay: 0.22,
             textAlign: 'center'
           });
         }
