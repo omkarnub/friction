@@ -4091,7 +4091,7 @@ td.invalid {
 /* Faculty Section (Distinct & Separated) */
 .faculty-section {
   max-width: 440px;
-  margin: 0 auto 3rem auto;
+  margin: 3.5rem auto 1rem auto;
 }
 
 .faculty-card-wrapper {

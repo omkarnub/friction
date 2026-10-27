@@ -4112,7 +4112,7 @@ td.invalid {
 /* Faculty Section (Distinct & Separated) */
 .faculty-section {
   max-width: 440px;
-  margin: 0 auto 3rem auto;
+  margin: 3.5rem auto 1rem auto;
 }
 
 .faculty-card-wrapper {
@@ -7801,31 +7801,6 @@ html.theme-transitioning *::after {
           <p class="section-subtitle team-subtitle">Engineering Mechanics Virtual Simulation • Academic Year 2026–27</p>
         </div>
 
-        <!-- ── Guiding Faculty Section (Distinct & Separated) ── -->
-        <div class="faculty-section">
-          <div class="team-group-label">Project Guidance &amp; Mentorship</div>
-          <div class="faculty-card-wrapper">
-            <div class="team-card faculty-card">
-              <div class="team-card-header">
-                <h3 class="team-member-name">Mr. Avinash Chavan</h3>
-                <span class="team-role-tag">Guiding Faculty</span>
-              </div>
-              <div class="team-field">
-                <span class="team-field-label">Role:</span>
-                <span class="team-field-val">Project Mentor &amp; Guide</span>
-              </div>
-              <div class="team-field">
-                <span class="team-field-label">Department:</span>
-                <span class="team-field-val">Engineering Mechanics</span>
-              </div>
-              <div class="team-field">
-                <span class="team-field-label">Academic Year:</span>
-                <span class="team-field-val">2026–27</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <!-- ── Student Development & Contributor Team ── -->
         <div class="student-team-section">
           <div class="team-group-label">Development &amp; Contributor Team</div>
@@ -7943,6 +7918,31 @@ html.theme-transitioning *::after {
               <div class="team-field">
                 <span class="team-field-label">Branch:</span>
                 <span class="team-field-val">Electronics &amp; Computer Science</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Academic Year:</span>
+                <span class="team-field-val">2026–27</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Guiding Faculty Section (Distinct & Separated) ── -->
+        <div class="faculty-section">
+          <div class="team-group-label">Project Guidance &amp; Mentorship</div>
+          <div class="faculty-card-wrapper">
+            <div class="team-card faculty-card">
+              <div class="team-card-header">
+                <h3 class="team-member-name">Mr. Avinash Chavan</h3>
+                <span class="team-role-tag">Guiding Faculty</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Role:</span>
+                <span class="team-field-val">Project Mentor &amp; Guide</span>
+              </div>
+              <div class="team-field">
+                <span class="team-field-label">Department:</span>
+                <span class="team-field-val">Engineering Mechanics</span>
               </div>
               <div class="team-field">
                 <span class="team-field-label">Academic Year:</span>
@@ -9739,12 +9739,14 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     repose: {
       trueMu: 0,
       threshold: 0,
+      slipAngle: 0,
       sliding: false,
       trialCount: 0,
       timer: null
     },
     friction: {
       trueMu: 0,
+      limitingP: 0,
       moving: false,
       trialCount: 0,
       animating: false
@@ -10095,6 +10097,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     if (angleDeg >= simState.repose.threshold) {
       simState.repose.sliding = true;
+      simState.repose.slipAngle = angleDeg;
+      if (reposeAngleSlider) reposeAngleSlider.disabled = true;
 
       // Haptic feedback for slip event
       if (window.SimHaptics) window.SimHaptics.slipFeedback();
@@ -10118,6 +10122,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (statusEl) {
         statusEl.innerHTML = `<span class="status-badge error">⚠ Block slipped at ${angleDeg.toFixed(1)}° — recorded static angle of repose</span>`;
       }
+
+      updateReposeReadout();
     }
   }
 
@@ -10131,7 +10137,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const indicator = document.getElementById('reposeSlipIndicator');
     if (indicator) indicator.setAttribute('opacity', '0');
 
+    if (reposeAngleSlider) reposeAngleSlider.disabled = false;
     simState.repose.sliding = false;
+    simState.repose.slipAngle = 0;
     simState.repose.warned = false;
     if (simState.repose.timer) {
       clearTimeout(simState.repose.timer);
@@ -10164,9 +10172,12 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function updateReposeReadout() {
     const angleDeg = parseFloat(reposeAngleSlider.value);
     const weight = parseFloat(reposeWeightSlider.value);
-    const angleRad = toRad(angleDeg);
+
+    // After slip, freeze readouts to the captured slip angle (not the live slider)
+    const displayAngle = simState.repose.sliding ? simState.repose.slipAngle : angleDeg;
+    const angleRad = toRad(displayAngle);
     const mu = Math.tan(angleRad);
-    const muDisplay = angleDeg >= 89.5 ? '∞' : mu.toFixed(4);
+    const muDisplay = displayAngle >= 89.5 ? '∞' : mu.toFixed(4);
 
     const elAngle = document.getElementById('reposeAngleValue');
     const elWeight = document.getElementById('reposeWeightValue');
@@ -10178,10 +10189,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const statusEl = document.getElementById('reposeStatus');
     const readoutStatusEl = document.getElementById('reposeReadoutStatus');
 
-    if (elAngle) elAngle.textContent = angleDeg.toFixed(1) + '°';
+    if (elAngle) elAngle.textContent = displayAngle.toFixed(1) + '°';
     if (elWeight) elWeight.textContent = weight.toFixed(1) + ' N';
     if (elMu) elMu.textContent = muDisplay;
-    if (elReadoutAngle) elReadoutAngle.textContent = angleDeg.toFixed(1) + '°';
+    if (elReadoutAngle) elReadoutAngle.textContent = displayAngle.toFixed(1) + '°';
     if (elReadoutWeight) elReadoutWeight.textContent = weight.toFixed(1) + ' N';
     if (elReadoutTan) elReadoutTan.textContent = muDisplay;
     if (elReadoutMu) elReadoutMu.textContent = muDisplay;
@@ -10200,6 +10211,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Static equilibrium — block is stable</span>';
         if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Stable</span>';
       }
+    } else {
+      if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = 'var(--accent-amber)'; }
+      if (statusEl) statusEl.innerHTML = `<span class="status-badge error">⚠ Block slipped at ${simState.repose.slipAngle.toFixed(1)}° — recorded static angle of repose</span>`;
+      if (readoutStatusEl) readoutStatusEl.innerHTML = `<span class="status-badge error">Slipped (${simState.repose.slipAngle.toFixed(1)}°)</span>`;
     }
   }
 
@@ -10553,6 +10568,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   function resetFrictionApparatus() {
     setSliderValue(frictionForceSlider, 0);
     simState.friction.moving = false;
+    simState.friction.limitingP = 0;
     refreshFrictionThreshold(frictionMaterialSelect.value);
     renderFrictionSVG();
     updateFrictionReadout();
@@ -10570,6 +10586,9 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     const Wcosth = weight * cosA;
     const Wsinth = weight * sinA;
 
+    // After motion starts, use the captured limiting P (the minimum P that caused motion)
+    const displayP = simState.friction.moving ? simState.friction.limitingP : pullForce;
+
     let mu, isValid = true, pTooLow = false;
 
     if (Wcosth < 0.0001) {
@@ -10579,8 +10598,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       // Limiting equilibrium: P = W sin θ + μ W cos θ
       // μ = (P - W sin θ) / (W cos θ)
       // When θ = 0°: μ = P / W
-      mu = (pullForce - Wsinth) / Wcosth;
-      if (pullForce < Wsinth - 0.0001) {
+      mu = (displayP - Wsinth) / Wcosth;
+      if (displayP < Wsinth - 0.0001) {
         pTooLow = true;
         isValid = false;
       }
@@ -10601,11 +10620,11 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
     if (elAngle) elAngle.textContent = angleDeg.toFixed(1) + '°';
     if (elWeight) elWeight.textContent = weight.toFixed(1) + ' N';
-    if (elForce) elForce.textContent = pullForce.toFixed(1) + ' N';
+    if (elForce) elForce.textContent = displayP.toFixed(1) + ' N';
     if (elMu) elMu.textContent = muDisplay;
     if (elReadoutAngle) elReadoutAngle.textContent = angleDeg.toFixed(1) + '°';
     if (elReadoutWeight) elReadoutWeight.textContent = weight.toFixed(1) + ' N';
-    if (elReadoutForce) elReadoutForce.textContent = pullForce.toFixed(1) + ' N';
+    if (elReadoutForce) elReadoutForce.textContent = displayP.toFixed(1) + ' N';
     if (elReadoutMu) elReadoutMu.textContent = muDisplay;
 
     // Movement threshold check
@@ -10619,6 +10638,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     } else if (willMove) {
       if (!simState.friction.moving) {
         simState.friction.moving = true;
+        simState.friction.limitingP = pullForce;
         if (window.SimHaptics) window.SimHaptics.motionStartFeedback();
       }
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = 'var(--accent-green)'; }
@@ -10626,11 +10646,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Moving ▲</span>';
     } else if (pullForce <= 0) {
       simState.friction.moving = false;
+      simState.friction.limitingP = 0;
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = ''; }
       if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Pan is empty (P = 0 N) — Add slotted weights to pan</span>';
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Empty Pan</span>';
     } else {
       simState.friction.moving = false;
+      simState.friction.limitingP = 0;
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = ''; }
       if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Static equilibrium — Add more weights until block slides</span>';
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Stable</span>';
@@ -10642,8 +10664,16 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     updateFrictionSVG();
   }
 
-  frictionAngleSlider.addEventListener('input', updateFriction);
-  frictionWeightSlider.addEventListener('input', updateFriction);
+  frictionAngleSlider.addEventListener('input', () => {
+    simState.friction.moving = false;
+    simState.friction.limitingP = 0;
+    updateFriction();
+  });
+  frictionWeightSlider.addEventListener('input', () => {
+    simState.friction.moving = false;
+    simState.friction.limitingP = 0;
+    updateFriction();
+  });
   frictionForceSlider.addEventListener('input', updateFriction);
   frictionMaterialSelect.addEventListener('change', () => {
     resetFrictionApparatus();
@@ -10666,6 +10696,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   if (clearPanBtn) {
     clearPanBtn.addEventListener('click', () => {
       const current = parseFloat(frictionForceSlider.value) || 0;
+      simState.friction.moving = false;
+      simState.friction.limitingP = 0;
       setSliderValue(frictionForceSlider, 0);
       if (frictionForceSlider._showProgressStep && current > 0) {
         frictionForceSlider._showProgressStep(-current);
@@ -10688,7 +10720,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
       const targetId = btn.dataset.stepTarget;
       const delta = parseFloat(btn.dataset.step);
       const slider = document.getElementById(targetId);
-      if (!slider) return;
+      if (!slider || slider.disabled) return;
 
       const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
       const max = parseFloat(slider.max) !== undefined ? parseFloat(slider.max) : 100;
@@ -10951,7 +10983,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
      Values Accessors for Data Log
      ================================================================ */
   window.getReposeValues = function () {
-    const angle = parseFloat(reposeAngleSlider.value);
+    const angle = simState.repose.sliding ? simState.repose.slipAngle : parseFloat(reposeAngleSlider.value);
     const weight = parseFloat(reposeWeightSlider.value);
     const mu = Math.tan(toRad(angle));
     const material = reposeMaterialSelect.value;
@@ -10961,7 +10993,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   window.getFrictionValues = function () {
     const angle = parseFloat(frictionAngleSlider.value);
     const weight = parseFloat(frictionWeightSlider.value);
-    const pullForce = parseFloat(frictionForceSlider.value);
+    const pullForce = simState.friction.moving ? simState.friction.limitingP : parseFloat(frictionForceSlider.value);
     const angleRad = toRad(angle);
     const Wcosth = weight * Math.cos(angleRad);
     const mu = Wcosth > 0.0001 ? (pullForce - weight * Math.sin(angleRad)) / Wcosth : null;
