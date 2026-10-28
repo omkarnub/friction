@@ -9,7 +9,7 @@
  *   - Realistic inextensible cord wrapping around detailed ball-bearing pulley at any angle (including horizontal θ = 0°)
  *   - Synchronized climbing kinematics: block moves up, string shortens, pulley rotates, pan lowers
  * - Angle of Repose apparatus with protractor dial, rotating needle, dynamic vectors, and accelerated slide-off to end bracket
- * - Automatic reset to default starting position upon data logging (fresh experimental variance per trial)
+ * - Automatic reset to default starting position upon data logging (deterministic limiting condition)
  * - Quick-add slotted weights buttons (+0.5N, +1N, +2N, +5N, Empty Pan)
  * - In-simulator toast notification system for seamless lab workflow
  */
@@ -131,7 +131,23 @@
      ================================================================ */
   function toRad(deg) { return (deg * Math.PI) / 180; }
   function toDeg(rad) { return (rad * 180) / Math.PI; }
-  function randomWithin(mat) { return +(mat.low + Math.random() * (mat.high - mat.low)).toFixed(4); }
+  /* ================================================================
+     Canonical Deterministic Friction & Slip Values
+     ================================================================ */
+  const CANONICAL = {
+    'wood-wood':          { slipAngle_deg: 21.0, mu_s: Math.tan(toRad(21.0)) }, // target ~0.38 (0.3839), mid=0.375, err=2.36%
+    'wood-steel':         { slipAngle_deg: 22.8, mu_s: Math.tan(toRad(22.8)) }, // target ~0.42 (0.4204), mid=0.400, err=5.09%
+    'wood-glass':         { slipAngle_deg: 18.3, mu_s: Math.tan(toRad(18.3)) }, // target ~0.33 (0.3307), mid=0.350, err=5.51%
+    'glass-glass':        { slipAngle_deg: 42.6, mu_s: Math.tan(toRad(42.6)) }, // target ~0.94 (0.9195), mid=0.950, err=3.21%
+    'steel-steel-dry':    { slipAngle_deg: 31.8, mu_s: Math.tan(toRad(31.8)) }, // target ~0.62 (0.6200), mid=0.650, err=4.61%
+    'steel-steel-lub':    { slipAngle_deg: 6.8,  mu_s: Math.tan(toRad(6.8)) },  // target ~0.12 (0.1192), mid=0.125, err=4.61%
+    'aluminum-aluminum':  { slipAngle_deg: 51.0, mu_s: Math.tan(toRad(51.0)) }, // target ~1.22 (1.2349), mid=1.200, err=2.91%
+    'rubber-concrete':    { slipAngle_deg: 35.0, mu_s: Math.tan(toRad(35.0)) }, // target ~0.72 (0.7002), mid=0.725, err=3.42%
+    'brass-steel':        { slipAngle_deg: 22.3, mu_s: Math.tan(toRad(22.3)) }, // target ~0.41 (0.4101), mid=0.425, err=3.50%
+  };
+
+  window.CANONICAL = CANONICAL;
+
   function polar(cx, cy, r, angleDeg) {
     const rad = toRad(angleDeg);
     return { x: cx + r * Math.cos(rad), y: cy - r * Math.sin(rad) };
@@ -375,7 +391,8 @@
       slipAngle: 0,
       sliding: false,
       trialCount: 0,
-      timer: null
+      timer: null,
+      warned: false
     },
     friction: {
       trueMu: 0,
@@ -387,17 +404,64 @@
   };
 
   function refreshReposeThreshold(matKey) {
-    const mat = MATERIALS[matKey];
-    simState.repose.trueMu = randomWithin(mat);
-    simState.repose.threshold = +(Math.atan(simState.repose.trueMu) * 180 / Math.PI).toFixed(1);
+    const can = CANONICAL[matKey] || CANONICAL['wood-wood'];
+    simState.repose.trueMu = can.mu_s;
+    simState.repose.threshold = can.slipAngle_deg;
+    simState.repose.slipAngle = 0;
     simState.repose.sliding = false;
+    simState.repose.warned = false;
   }
 
   function refreshFrictionThreshold(matKey) {
-    const mat = MATERIALS[matKey];
-    simState.friction.trueMu = randomWithin(mat);
+    const can = CANONICAL[matKey] || CANONICAL['wood-wood'];
+    simState.friction.trueMu = can.mu_s;
     simState.friction.moving = false;
+    simState.friction.limitingP = 0;
   }
+
+  /* ================================================================
+     Pure Physics Evaluator for Limiting Friction
+     ================================================================ */
+  function evaluateFriction(angleDeg, W, rawP, matKey) {
+    const key = matKey || (frictionMaterialSelect ? frictionMaterialSelect.value : 'wood-wood');
+    const can = CANONICAL[key] || CANONICAL['wood-wood'];
+    const mu_s = can.mu_s;
+    const angleRad = toRad(angleDeg);
+    const cosA = Math.cos(angleRad);
+    const sinA = Math.sin(angleRad);
+    const Wcosth = W * cosA;
+    const Wsinth = W * sinA;
+
+    const requiredP = mu_s * Wcosth + Wsinth;
+    const willMove = rawP >= requiredP - 1e-9 && rawP > 0;
+    const displayP = willMove ? requiredP : rawP;
+
+    let mu, isValid = true, pTooLow = false;
+    if (Wcosth < 0.0001) {
+      mu = Infinity;
+      isValid = false;
+    } else if (willMove) {
+      mu = mu_s;
+    } else {
+      mu = (displayP - Wsinth) / Wcosth;
+      if (displayP < Wsinth - 0.0001) {
+        pTooLow = true;
+        isValid = false;
+      }
+    }
+
+    return {
+      requiredP,
+      willMove,
+      displayP,
+      mu,
+      isValid,
+      pTooLow,
+      Wcosth,
+      Wsinth
+    };
+  }
+  window.evaluateFriction = evaluateFriction;
 
   /* ================================================================
      DOM Controls
@@ -624,15 +688,18 @@
     updateReposeSVG();
   }
 
-  function updateReposeSVG() {
-    const angleDeg = parseFloat(reposeAngleSlider.value);
-    const weight = parseFloat(reposeWeightSlider.value);
+  let inReposeAngleUpdate = false;
+
+  function updateReposeSVG(angleOverride) {
+    const angleDeg = angleOverride !== undefined
+      ? angleOverride
+      : (parseFloat(reposeAngleSlider.value) || 0);
+    const weight = parseFloat(reposeWeightSlider.value) || 0;
     const angleRad = toRad(angleDeg);
-    const mu = Math.tan(angleRad);
     const svg = document.getElementById('reposeSvg');
     if (!svg) return;
 
-    // Rotate incline board around pivot
+    // Rotate incline board around pivot to the live board angle
     const incline = document.getElementById('reposeIncline');
     if (incline) {
       incline.setAttribute('transform', `rotate(${-angleDeg}, ${R_PIVOT.x}, ${R_PIVOT.y})`);
@@ -709,54 +776,82 @@
       `;
     }
     if (forcesGroup) forcesGroup.innerHTML = forcesHTML;
-
-    // Check for slip
-    checkReposeSlip(angleDeg, weight);
   }
 
-  function checkReposeSlip(angleDeg, weight) {
-    if (simState.repose.sliding) return;
+  function applyReposeAngle(rawAngle) {
+    if (inReposeAngleUpdate) return;
+    inReposeAngleUpdate = true;
+    try {
+      const threshold = simState.repose.threshold;
+      const min = parseFloat(reposeAngleSlider.min) || 0;
+      const max = parseFloat(reposeAngleSlider.max) || 90;
+      const clampedInput = Math.max(min, Math.min(max, rawAngle));
 
-    // Warning haptic nudge when approaching critical angle (within 1.2 degrees)
-    if (window.SimHaptics && !simState.repose.warned) {
-      if (simState.repose.threshold - angleDeg <= 1.2 && simState.repose.threshold - angleDeg > 0) {
-        simState.repose.warned = true;
-        window.SimHaptics.warningFeedback();
+      reposeAngleSlider.value = clampedInput.toFixed(1);
+      if (reposeAngleSlider._setCommittedValue) reposeAngleSlider._setCommittedValue(clampedInput);
+      if (reposeAngleSlider._updateFill) reposeAngleSlider._updateFill();
+
+      if (clampedInput >= threshold) {
+        simState.repose.sliding = true;
+        simState.repose.slipAngle = threshold; // Canonical slip angle recorded!
+
+        if (window.SimHaptics && !simState.repose.slipped) {
+          simState.repose.slipped = true;
+          window.SimHaptics.slipFeedback();
+        }
+
+        // Display slip banner with critical angle
+        const indicator = document.getElementById('reposeSlipIndicator');
+        const slipText = document.getElementById('reposeSlipText');
+        if (indicator && slipText) {
+          indicator.setAttribute('opacity', '1');
+          slipText.textContent = `⚠ SLIPPED AT α = ${threshold.toFixed(1)}° — μ_s = ${simState.repose.trueMu.toFixed(4)}`;
+        }
+
+        // Accelerated slide-off down the inclined plane
+        const blockGroup = document.getElementById('reposeBlockGroup');
+        if (blockGroup) {
+          blockGroup.style.transition = 'transform 0.85s cubic-bezier(0.38, 0, 0.7, 1)';
+          blockGroup.style.transform = 'translate(-140px, 0)';
+        }
+
+        const statusEl = document.getElementById('reposeStatus');
+        if (statusEl) {
+          statusEl.innerHTML = `<span class="status-badge error">⚠ Block slipped at ${threshold.toFixed(1)}° — recorded static angle of repose</span>`;
+        }
+
+        updateReposeSVG(clampedInput);
+        updateReposeReadout(clampedInput);
+      } else {
+        simState.repose.sliding = false;
+        simState.repose.slipAngle = 0;
+        simState.repose.slipped = false;
+
+        const indicator = document.getElementById('reposeSlipIndicator');
+        if (indicator) indicator.setAttribute('opacity', '0');
+
+        const blockGroup = document.getElementById('reposeBlockGroup');
+        if (blockGroup) {
+          blockGroup.style.transition = 'none';
+          blockGroup.style.transform = 'translate(0, 0)';
+        }
+
+        // Warning haptic nudge when approaching critical angle (within 1.2 degrees)
+        if (window.SimHaptics && !simState.repose.warned) {
+          if (threshold - clampedInput <= 1.2 && threshold - clampedInput > 0) {
+            simState.repose.warned = true;
+            window.SimHaptics.warningFeedback();
+          }
+        }
+        if (simState.repose.warned && threshold - clampedInput > 1.8) {
+          simState.repose.warned = false;
+        }
+
+        updateReposeSVG(clampedInput);
+        updateReposeReadout(clampedInput);
       }
-    }
-    if (simState.repose.warned && simState.repose.threshold - angleDeg > 1.8) {
-      simState.repose.warned = false;
-    }
-
-    if (angleDeg >= simState.repose.threshold) {
-      simState.repose.sliding = true;
-      simState.repose.slipAngle = angleDeg;
-      if (reposeAngleSlider) reposeAngleSlider.disabled = true;
-
-      // Haptic feedback for slip event
-      if (window.SimHaptics) window.SimHaptics.slipFeedback();
-
-      // Display slip banner with critical angle
-      const indicator = document.getElementById('reposeSlipIndicator');
-      const slipText = document.getElementById('reposeSlipText');
-      if (indicator && slipText) {
-        indicator.setAttribute('opacity', '1');
-        slipText.textContent = `⚠ SLIPPED AT α = ${angleDeg.toFixed(1)}° — μ_s = ${Math.tan(toRad(angleDeg)).toFixed(4)}`;
-      }
-
-      // Physical acceleration down the inclined plane towards the bottom stop bracket
-      const blockGroup = document.getElementById('reposeBlockGroup');
-      if (blockGroup) {
-        blockGroup.style.transition = 'transform 0.85s cubic-bezier(0.38, 0, 0.7, 1)';
-        blockGroup.style.transform = 'translate(-140px, 0)';
-      }
-
-      const statusEl = document.getElementById('reposeStatus');
-      if (statusEl) {
-        statusEl.innerHTML = `<span class="status-badge error">⚠ Block slipped at ${angleDeg.toFixed(1)}° — recorded static angle of repose</span>`;
-      }
-
-      updateReposeReadout();
+    } finally {
+      inReposeAngleUpdate = false;
     }
   }
 
@@ -770,10 +865,10 @@
     const indicator = document.getElementById('reposeSlipIndicator');
     if (indicator) indicator.setAttribute('opacity', '0');
 
-    if (reposeAngleSlider) reposeAngleSlider.disabled = false;
     simState.repose.sliding = false;
     simState.repose.slipAngle = 0;
     simState.repose.warned = false;
+    simState.repose.slipped = false;
     if (simState.repose.timer) {
       clearTimeout(simState.repose.timer);
       simState.repose.timer = null;
@@ -792,24 +887,27 @@
     slider.dispatchEvent(new Event('change', { bubbles: true }));
     slider._programmaticChange = false;
   }
+  window.setSliderValue = setSliderValue;
 
   function resetReposeApparatus() {
     resetReposeBlock();
-    setSliderValue(reposeAngleSlider, 0);
     refreshReposeThreshold(reposeMaterialSelect.value);
+    setSliderValue(reposeAngleSlider, 0);
     renderReposeSVG();
-    updateReposeReadout();
+    updateReposeReadout(0);
   }
   window.resetReposeApparatus = resetReposeApparatus;
 
-  function updateReposeReadout() {
-    const angleDeg = parseFloat(reposeAngleSlider.value);
-    const weight = parseFloat(reposeWeightSlider.value);
+  function updateReposeReadout(angleOverride) {
+    const angleDeg = angleOverride !== undefined
+      ? angleOverride
+      : (parseFloat(reposeAngleSlider.value) || 0);
+    const weight = parseFloat(reposeWeightSlider.value) || 0;
 
-    // After slip, freeze readouts to the captured slip angle (not the live slider)
-    const displayAngle = simState.repose.sliding ? simState.repose.slipAngle : angleDeg;
+    // After slip, formula readouts lock to the canonical slip condition
+    const displayAngle = simState.repose.sliding ? simState.repose.threshold : angleDeg;
     const angleRad = toRad(displayAngle);
-    const mu = Math.tan(angleRad);
+    const mu = simState.repose.sliding ? simState.repose.trueMu : Math.tan(angleRad);
     const muDisplay = displayAngle >= 89.5 ? '∞' : mu.toFixed(4);
 
     const elAngle = document.getElementById('reposeAngleValue');
@@ -822,7 +920,7 @@
     const statusEl = document.getElementById('reposeStatus');
     const readoutStatusEl = document.getElementById('reposeReadoutStatus');
 
-    if (elAngle) elAngle.textContent = displayAngle.toFixed(1) + '°';
+    if (elAngle) elAngle.textContent = angleDeg.toFixed(1) + '°';
     if (elWeight) elWeight.textContent = weight.toFixed(1) + ' N';
     if (elMu) elMu.textContent = muDisplay;
     if (elReadoutAngle) elReadoutAngle.textContent = displayAngle.toFixed(1) + '°';
@@ -846,18 +944,22 @@
       }
     } else {
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = 'var(--accent-amber)'; }
-      if (statusEl) statusEl.innerHTML = `<span class="status-badge error">⚠ Block slipped at ${simState.repose.slipAngle.toFixed(1)}° — recorded static angle of repose</span>`;
-      if (readoutStatusEl) readoutStatusEl.innerHTML = `<span class="status-badge error">Slipped (${simState.repose.slipAngle.toFixed(1)}°)</span>`;
+      if (statusEl) statusEl.innerHTML = `<span class="status-badge error">⚠ Block slipped at ${simState.repose.threshold.toFixed(1)}° — recorded static angle of repose</span>`;
+      if (readoutStatusEl) readoutStatusEl.innerHTML = `<span class="status-badge error">Slipped (${simState.repose.threshold.toFixed(1)}°)</span>`;
     }
   }
 
   function updateRepose() {
-    updateReposeReadout();
-    updateReposeSVG();
+    applyReposeAngle(parseFloat(reposeAngleSlider.value) || 0);
   }
 
-  reposeAngleSlider.addEventListener('input', updateRepose);
-  reposeWeightSlider.addEventListener('input', updateRepose);
+  reposeAngleSlider.addEventListener('input', () => {
+    applyReposeAngle(parseFloat(reposeAngleSlider.value) || 0);
+  });
+  reposeWeightSlider.addEventListener('input', () => {
+    updateReposeSVG();
+    updateReposeReadout();
+  });
   reposeMaterialSelect.addEventListener('change', () => {
     resetReposeApparatus();
   });
@@ -869,7 +971,6 @@
       showSimToast('Apparatus Reset', 'Angle set to 0.0° — ready for a fresh measurement');
     });
   }
-
   /* ================================================================
      METHOD 2: FRICTION PLANE (APPARATUS OVERHAUL)
      ================================================================ */
@@ -984,10 +1085,100 @@
     updateFrictionSVG();
   }
 
-  function updateFrictionSVG() {
-    const angleDeg = parseFloat(frictionAngleSlider.value);
-    const weight = parseFloat(frictionWeightSlider.value);
-    const pullForce = parseFloat(frictionForceSlider.value);
+  let inFrictionForceUpdate = false;
+  let inFrictionSync = false;
+
+  function applyFrictionForce(rawP) {
+    if (inFrictionForceUpdate) return;
+    inFrictionForceUpdate = true;
+    try {
+      const angleDeg = parseFloat(frictionAngleSlider.value) || 0;
+      const weight = parseFloat(frictionWeightSlider.value) || 0;
+      const matKey = frictionMaterialSelect.value;
+
+      const min = parseFloat(frictionForceSlider.min) || 0;
+      const max = parseFloat(frictionForceSlider.max) || 100;
+      const clampedP = Math.max(min, Math.min(max, rawP));
+
+      const evalResult = evaluateFriction(angleDeg, weight, clampedP, matKey);
+      const { requiredP, willMove } = evalResult;
+
+      // Handle edge case where requiredP > 100 N
+      if (requiredP > 100) {
+        frictionForceSlider.max = Math.ceil(requiredP).toString();
+      } else if (parseFloat(frictionForceSlider.max) > 100 && clampedP <= 100) {
+        frictionForceSlider.max = '100';
+      }
+
+      frictionForceSlider.value = clampedP.toFixed(1);
+      if (frictionForceSlider._setCommittedValue) frictionForceSlider._setCommittedValue(clampedP);
+      if (frictionForceSlider._updateFill) frictionForceSlider._updateFill();
+
+      if (willMove) {
+        const wasMoving = simState.friction.moving;
+        simState.friction.moving = true;
+        simState.friction.limitingP = requiredP; // UNROUNDED full double precision canonical value!
+
+        if (!wasMoving && window.SimHaptics) {
+          window.SimHaptics.motionStartFeedback();
+        }
+
+        updateFrictionSVG(evalResult);
+        updateFrictionReadout(evalResult);
+      } else {
+        simState.friction.moving = false;
+        simState.friction.limitingP = 0;
+
+        updateFrictionSVG(evalResult);
+        updateFrictionReadout(evalResult);
+      }
+    } finally {
+      inFrictionForceUpdate = false;
+    }
+  }
+
+  function syncFrictionAfterSetupChange() {
+    if (inFrictionSync) return;
+    inFrictionSync = true;
+    try {
+      const angleDeg = parseFloat(frictionAngleSlider.value) || 0;
+      const weight = parseFloat(frictionWeightSlider.value) || 0;
+      const matKey = frictionMaterialSelect.value;
+      const currentP = parseFloat(frictionForceSlider.value) || 0;
+
+      const evalResult = evaluateFriction(angleDeg, weight, currentP, matKey);
+      const newRequiredP = evalResult.requiredP;
+
+      if (newRequiredP > 100) {
+        frictionForceSlider.max = Math.ceil(newRequiredP).toString();
+      } else if (parseFloat(frictionForceSlider.max) > 100 && currentP <= 100) {
+        frictionForceSlider.max = '100';
+      }
+
+      if (currentP >= newRequiredP && currentP > 0) {
+        simState.friction.moving = true;
+        simState.friction.limitingP = newRequiredP;
+      } else {
+        simState.friction.moving = false;
+        simState.friction.limitingP = 0;
+      }
+
+      updateFrictionSVG(evalResult);
+      updateFrictionReadout(evalResult);
+    } finally {
+      inFrictionSync = false;
+    }
+  }
+
+  function updateFrictionSVG(evalResult) {
+    const angleDeg = parseFloat(frictionAngleSlider.value) || 0;
+    const weight = parseFloat(frictionWeightSlider.value) || 0;
+    const matKey = frictionMaterialSelect.value;
+    const currentP = parseFloat(frictionForceSlider.value) || 0;
+
+    const ev = evalResult || evaluateFriction(angleDeg, weight, currentP, matKey);
+    const { willMove } = ev;
+    const pullForce = currentP;
     const angleRad = toRad(angleDeg);
     const svg = document.getElementById('frictionSvg');
     if (!svg) return;
@@ -1004,15 +1195,12 @@
     // Physics checks for motion up the plane
     const cosA = Math.cos(angleRad), sinA = Math.sin(angleRad);
     const Wcosth = weight * cosA;
-    const Wsinth = weight * sinA;
-    const requiredP = simState.friction.trueMu * Wcosth + Wsinth;
-    const willMove = pullForce >= requiredP && pullForce > 0;
 
     // Block dimensions & position
     const blockW = 44 + weight * 0.45;
     const blockH = 26 + weight * 0.35;
     const initialBlockDist = F_PLANE_LEN * 0.38;
-    
+
     // When climbing, block slides smoothly up the plane towards pulley
     const climbOffset = willMove ? 42 : 0;
     const blockLocalX = F_PIVOT.x + initialBlockDist - blockW / 2 + climbOffset;
@@ -1060,7 +1248,6 @@
     if (string1) {
       const eyeX = blockLocalX + blockW;
       const eyeY = blockLocalY + blockH - 8;
-      // Top tangent of pulley in local coords: y = pulleyLocalY - PULLEY_R
       string1.setAttribute('x1', eyeX.toFixed(1));
       string1.setAttribute('y1', eyeY.toFixed(1));
       string1.setAttribute('x2', (pulleyLocalX - 3).toFixed(1));
@@ -1081,12 +1268,10 @@
     const hangString = document.getElementById('frictionHangString');
     const panAssembly = document.getElementById('frictionPanAssembly');
 
-    // Tangent wrap geometry: entry from incline top tangent to vertical rightmost edge
     const rDropWorldX = pulleyWorldX + PULLEY_R;
     const rDropWorldY = pulleyWorldY;
 
     if (wrapArc) {
-      // Curve from entry point around pulley rim to drop point
       const entryAngRad = -angleRad + Math.PI / 2;
       const entryX = pulleyWorldX + PULLEY_R * Math.cos(entryAngRad);
       const entryY = pulleyWorldY - PULLEY_R * Math.sin(entryAngRad);
@@ -1117,17 +1302,13 @@
     if (weightsGroup) {
       let wHTML = '';
       if (pullForce > 0.05) {
-        // Slotted weight count: 1 to 6 discs proportional to P
         const numDiscs = Math.min(6, Math.max(1, Math.ceil(pullForce / 3.5)));
         for (let i = 0; i < numDiscs; i++) {
           const dy = -(i * 5.5 + 5);
           wHTML += `
             <g class="pan-slotted-disc" transform="translate(0, ${dy})">
-              <!-- Slotted Brass Cylindrical Disc -->
               <rect x="-15" y="0" width="30" height="5" rx="1.5" fill="url(#weightBrassGrad)" stroke="#8c6d1d" stroke-width="0.6"/>
-              <!-- Center Slot Cutout (Real slotted weight detail) -->
               <line x1="0" y1="0" x2="0" y2="5" stroke="rgba(30, 20, 5, 0.45)" stroke-width="1.2"/>
-              <!-- Specular rim highlight -->
               <line x1="-13" y1="0.8" x2="13" y2="0.8" stroke="rgba(255, 255, 255, 0.65)" stroke-width="0.6"/>
             </g>
           `;
@@ -1138,13 +1319,17 @@
 
     const panPill = document.getElementById('frictionPanPillText');
     if (panPill) {
-      panPill.textContent = `P = ${pullForce.toFixed(1)} N`;
+      panPill.textContent = `P = ${pullForce.toFixed(2)} N`;
     }
 
     // Motion Indicator
     const moveIndicator = document.getElementById('frictionMoveIndicator');
     if (moveIndicator) {
       moveIndicator.setAttribute('opacity', willMove ? '1' : '0');
+      const textEl = moveIndicator.querySelector('text');
+      if (textEl) {
+        textEl.textContent = angleDeg > 0 ? '▲ BLOCK MOVING UP INCLINE' : '► BLOCK SLIDING FORWARD';
+      }
     }
 
     // Force Vectors in World Coordinates
@@ -1161,7 +1346,7 @@
       <text x="${bWorldCenterX + 8}" y="${bWorldCenterY + gLen / 2 + 3}" fill="var(--accent-green)" font-size="10" font-family="JetBrains Mono" font-weight="700">W</text>
     `;
 
-    // Normal Reaction N (perpendicular to plane surface)
+    // Normal Reaction N
     const nLen = Math.min(weight * 1.5 * cosA + 16, 55);
     const nEndX = bWorldCenterX - nLen * sinA;
     const nEndY = bWorldCenterY - nLen * cosA;
@@ -1171,7 +1356,7 @@
       <text x="${(nEndX - 12).toFixed(1)}" y="${(nEndY - 2).toFixed(1)}" fill="var(--accent-purple)" font-size="10" font-family="JetBrains Mono" font-weight="700">N</text>
     `;
 
-    // Limiting Static Friction force f (along plane down-slope, opposing upward pull P)
+    // Static Friction force f
     if (pullForce > 0.2) {
       const fMag = Math.min(pullForce, simState.friction.trueMu * Wcosth);
       const fLen = Math.min(fMag * 1.5 + 14, 55);
@@ -1199,45 +1384,27 @@
   }
 
   function resetFrictionApparatus() {
-    setSliderValue(frictionForceSlider, 0);
     simState.friction.moving = false;
     simState.friction.limitingP = 0;
     refreshFrictionThreshold(frictionMaterialSelect.value);
+    setSliderValue(frictionForceSlider, 0);
     renderFrictionSVG();
     updateFrictionReadout();
   }
   window.resetFrictionApparatus = resetFrictionApparatus;
 
-  function updateFrictionReadout() {
-    const angleDeg = parseFloat(frictionAngleSlider.value);
-    const weight = parseFloat(frictionWeightSlider.value);
-    const pullForce = parseFloat(frictionForceSlider.value);
-    const angleRad = toRad(angleDeg);
+  function updateFrictionReadout(evalResult) {
+    const angleDeg = parseFloat(frictionAngleSlider.value) || 0;
+    const weight = parseFloat(frictionWeightSlider.value) || 0;
+    const matKey = frictionMaterialSelect.value;
+    const currentP = parseFloat(frictionForceSlider.value) || 0;
 
-    const cosA = Math.cos(angleRad);
-    const sinA = Math.sin(angleRad);
-    const Wcosth = weight * cosA;
-    const Wsinth = weight * sinA;
+    const ev = evalResult || evaluateFriction(angleDeg, weight, currentP, matKey);
+    const { requiredP, willMove, isValid, pTooLow } = ev;
 
-    // After motion starts, use the captured limiting P (the minimum P that caused motion)
-    const displayP = simState.friction.moving ? simState.friction.limitingP : pullForce;
-
-    let mu, isValid = true, pTooLow = false;
-
-    if (Wcosth < 0.0001) {
-      mu = Infinity;
-      isValid = false;
-    } else {
-      // Limiting equilibrium: P = W sin θ + μ W cos θ
-      // μ = (P - W sin θ) / (W cos θ)
-      // When θ = 0°: μ = P / W
-      mu = (displayP - Wsinth) / Wcosth;
-      if (displayP < Wsinth - 0.0001) {
-        pTooLow = true;
-        isValid = false;
-      }
-    }
-
+    // In limiting equilibrium / motion, readout shows the limiting condition (requiredP, mu_s)
+    const readoutP = willMove ? requiredP : currentP;
+    const mu = willMove ? simState.friction.trueMu : ev.mu;
     const muDisplay = !isValid ? (pTooLow ? '< 0' : '∞') : mu.toFixed(4);
 
     const elAngle = document.getElementById('frictionAngleValue');
@@ -1253,39 +1420,27 @@
 
     if (elAngle) elAngle.textContent = angleDeg.toFixed(1) + '°';
     if (elWeight) elWeight.textContent = weight.toFixed(1) + ' N';
-    if (elForce) elForce.textContent = displayP.toFixed(1) + ' N';
+    if (elForce) elForce.textContent = currentP.toFixed(2) + ' N';
     if (elMu) elMu.textContent = muDisplay;
     if (elReadoutAngle) elReadoutAngle.textContent = angleDeg.toFixed(1) + '°';
     if (elReadoutWeight) elReadoutWeight.textContent = weight.toFixed(1) + ' N';
-    if (elReadoutForce) elReadoutForce.textContent = displayP.toFixed(1) + ' N';
+    if (elReadoutForce) elReadoutForce.textContent = readoutP.toFixed(2) + ' N';
     if (elReadoutMu) elReadoutMu.textContent = muDisplay;
-
-    // Movement threshold check
-    const requiredP = simState.friction.trueMu * Wcosth + Wsinth;
-    const willMove = pullForce >= requiredP && pullForce > 0 && isValid;
 
     if (pTooLow) {
       if (elMu) elMu.className = 'mu-readout error';
       if (statusEl) statusEl.innerHTML = '<span class="status-badge error">P is below downhill gravity (W sin θ)</span>';
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge error">P &lt; W sin θ</span>';
     } else if (willMove) {
-      if (!simState.friction.moving) {
-        simState.friction.moving = true;
-        simState.friction.limitingP = pullForce;
-        if (window.SimHaptics) window.SimHaptics.motionStartFeedback();
-      }
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = 'var(--accent-green)'; }
-      if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Block is moving up plane — Limiting pull P reached ✓</span>';
-      if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Moving ▲</span>';
-    } else if (pullForce <= 0) {
-      simState.friction.moving = false;
-      simState.friction.limitingP = 0;
+      const moveDesc = angleDeg > 0 ? 'moving up plane' : 'sliding forward';
+      if (statusEl) statusEl.innerHTML = `<span class="status-badge success">Block is ${moveDesc} — Limiting pull reached at P = ${requiredP.toFixed(2)} N ✓</span>`;
+      if (readoutStatusEl) readoutStatusEl.innerHTML = `<span class="status-badge success">${angleDeg > 0 ? 'Moving ▲' : 'Sliding ►'}</span>`;
+    } else if (currentP <= 0) {
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = ''; }
-      if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Pan is empty (P = 0 N) — Add slotted weights to pan</span>';
+      if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Pan is empty (P = 0.00 N) — Add slotted weights to pan</span>';
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Empty Pan</span>';
     } else {
-      simState.friction.moving = false;
-      simState.friction.limitingP = 0;
       if (elMu) { elMu.className = 'mu-readout'; elMu.style.color = ''; }
       if (statusEl) statusEl.innerHTML = '<span class="status-badge success">Static equilibrium — Add more weights until block slides</span>';
       if (readoutStatusEl) readoutStatusEl.innerHTML = '<span class="status-badge success">Stable</span>';
@@ -1293,21 +1448,14 @@
   }
 
   function updateFriction() {
-    updateFrictionReadout();
-    updateFrictionSVG();
+    applyFrictionForce(parseFloat(frictionForceSlider.value) || 0);
   }
 
-  frictionAngleSlider.addEventListener('input', () => {
-    simState.friction.moving = false;
-    simState.friction.limitingP = 0;
-    updateFriction();
+  frictionAngleSlider.addEventListener('input', syncFrictionAfterSetupChange);
+  frictionWeightSlider.addEventListener('input', syncFrictionAfterSetupChange);
+  frictionForceSlider.addEventListener('input', () => {
+    applyFrictionForce(parseFloat(frictionForceSlider.value) || 0);
   });
-  frictionWeightSlider.addEventListener('input', () => {
-    simState.friction.moving = false;
-    simState.friction.limitingP = 0;
-    updateFriction();
-  });
-  frictionForceSlider.addEventListener('input', updateFriction);
   frictionMaterialSelect.addEventListener('change', () => {
     resetFrictionApparatus();
   });
@@ -1317,10 +1465,10 @@
     btn.addEventListener('click', () => {
       const delta = parseFloat(btn.dataset.addP);
       const current = parseFloat(frictionForceSlider.value) || 0;
-      const next = Math.min(100, Math.max(0, current + delta));
-      setSliderValue(frictionForceSlider, next.toFixed(1));
+      const next = current + delta;
+      applyFrictionForce(next);
       if (frictionForceSlider._showProgressStep) {
-        frictionForceSlider._showProgressStep(next - current);
+        frictionForceSlider._showProgressStep(delta);
       }
     });
   });
@@ -1332,6 +1480,7 @@
       simState.friction.moving = false;
       simState.friction.limitingP = 0;
       setSliderValue(frictionForceSlider, 0);
+      applyFrictionForce(0);
       if (frictionForceSlider._showProgressStep && current > 0) {
         frictionForceSlider._showProgressStep(-current);
       }
@@ -1342,7 +1491,7 @@
   if (frictionResetBtn) {
     frictionResetBtn.addEventListener('click', () => {
       resetFrictionApparatus();
-      showSimToast('Apparatus Reset', 'Pull force P cleared to 0.0 N — ready for next trial');
+      showSimToast('Apparatus Reset', 'Pull force P cleared to 0.00 N — ready for next trial');
     });
   }
 
@@ -1353,13 +1502,33 @@
       const targetId = btn.dataset.stepTarget;
       const delta = parseFloat(btn.dataset.step);
       const slider = document.getElementById(targetId);
-      if (!slider || slider.disabled) return;
+      if (!slider) return;
 
       const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
       const max = parseFloat(slider.max) !== undefined ? parseFloat(slider.max) : 100;
-      const step = parseFloat(slider.step) || 0.1;
       const current = parseFloat(slider.value) || 0;
 
+      if (targetId === 'frictionForce') {
+        const next = Math.max(min, Math.min(max, current + delta));
+        const actualDelta = next - current;
+        applyFrictionForce(next);
+        if (slider._showProgressStep) {
+          slider._showProgressStep(actualDelta);
+        }
+        return;
+      }
+
+      if (targetId === 'reposeAngle') {
+        const next = Math.max(min, Math.min(max, current + delta));
+        const actualDelta = next - current;
+        applyReposeAngle(next);
+        if (slider._showProgressStep) {
+          slider._showProgressStep(actualDelta);
+        }
+        return;
+      }
+
+      const step = parseFloat(slider.step) || 0.1;
       let next = current + delta;
       next = Math.max(min, Math.min(max, next));
       const stepDecimals = (step.toString().split('.')[1] || '').length;
@@ -1373,7 +1542,6 @@
       }
     });
   });
-
   /* ================================================================
      Simulation Sliders:
      - Hold and drag thumb only (tapping on track line blocked)
@@ -1386,7 +1554,7 @@
       { id: 'reposeWeight', unit: ' N', decimals: 1 },
       { id: 'frictionAngle', unit: '°', decimals: 1 },
       { id: 'frictionWeight', unit: ' N', decimals: 1 },
-      { id: 'frictionForce', unit: ' N', decimals: 1 }
+      { id: 'frictionForce', unit: ' N', decimals: 2 }
     ];
 
     sliderConfigs.forEach(cfg => {
@@ -1471,9 +1639,24 @@
         return e.clientX;
       }
 
+      let isKeyboardNav = false;
+      slider.addEventListener('keydown', (e) => {
+        if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End'].includes(e.key)) {
+          isKeyboardNav = true;
+        }
+      });
+      slider.addEventListener('keyup', () => {
+        isKeyboardNav = false;
+      });
+
       // Capture-phase track-tap interception:
       // Tapping anywhere on the track line outside the thumb is completely blocked!
       function interceptTrackTap(e) {
+        if (slider.disabled) return;
+        if (isKeyboardNav) {
+          lastCommittedVal = parseFloat(slider.value) || 0;
+          return;
+        }
         if (!isDragging && !slider._programmaticChange) {
           e.preventDefault();
           e.stopPropagation();
@@ -1492,6 +1675,7 @@
       // Track tap prevention:
       // If user taps in between the slider line (not on the thumb), prevent movement!
       function handlePointerDown(e) {
+        if (slider.disabled) return;
         const rect = slider.getBoundingClientRect();
         const min = parseFloat(slider.min) !== undefined ? parseFloat(slider.min) : 0;
         const max = parseFloat(slider.max) !== undefined ? parseFloat(slider.max) : 100;
@@ -1525,6 +1709,11 @@
 
       function handleDragMove(e) {
         if (!isDragging) return;
+        if (slider.disabled) {
+          isDragging = false;
+          hideProgression(0);
+          return;
+        }
         const clientX = getClientX(e);
         if (clientX === undefined) return;
 
@@ -1544,6 +1733,7 @@
         let steppedVal = Math.round((rawVal - min) / step) * step + min;
         steppedVal = Math.max(min, Math.min(max, steppedVal));
         steppedVal = parseFloat(steppedVal.toFixed(Math.max(1, stepDecimals)));
+
 
         if (parseFloat(slider.value) !== steppedVal) {
           lastCommittedVal = steppedVal;
@@ -1616,9 +1806,9 @@
      Values Accessors for Data Log
      ================================================================ */
   window.getReposeValues = function () {
-    const angle = simState.repose.sliding ? simState.repose.slipAngle : parseFloat(reposeAngleSlider.value);
+    const angle = simState.repose.sliding ? simState.repose.threshold : parseFloat(reposeAngleSlider.value);
     const weight = parseFloat(reposeWeightSlider.value);
-    const mu = Math.tan(toRad(angle));
+    const mu = simState.repose.sliding ? simState.repose.trueMu : Math.tan(toRad(angle));
     const material = reposeMaterialSelect.value;
     return { angle, weight, mu, material, method: 'repose', sliding: simState.repose.sliding };
   };
@@ -1626,12 +1816,18 @@
   window.getFrictionValues = function () {
     const angle = parseFloat(frictionAngleSlider.value);
     const weight = parseFloat(frictionWeightSlider.value);
-    const pullForce = simState.friction.moving ? simState.friction.limitingP : parseFloat(frictionForceSlider.value);
-    const angleRad = toRad(angle);
-    const Wcosth = weight * Math.cos(angleRad);
-    const mu = Wcosth > 0.0001 ? (pullForce - weight * Math.sin(angleRad)) / Wcosth : null;
-    const material = frictionMaterialSelect.value;
-    return { angle, weight, pullForce, mu, material, method: 'friction', moving: simState.friction.moving };
+    const matKey = frictionMaterialSelect.value;
+    const rawP = simState.friction.moving ? simState.friction.limitingP : (parseFloat(frictionForceSlider.value) || 0);
+    const evalResult = evaluateFriction(angle, weight, rawP, matKey);
+    return {
+      angle,
+      weight,
+      pullForce: evalResult.displayP,
+      mu: evalResult.isValid ? evalResult.mu : null,
+      material: matKey,
+      method: 'friction',
+      moving: evalResult.willMove
+    };
   };
 
   /* ================================================================

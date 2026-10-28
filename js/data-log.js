@@ -466,7 +466,7 @@
     if (window.showSimToast) {
       window.showSimToast(
         'Reading Logged to Data Log',
-        `Trial #${logEntries.length}: θ = ${vals.angle.toFixed(1)}°, W = ${vals.weight.toFixed(1)} N, P = ${vals.pullForce.toFixed(1)} N, μ = ${muText} — Apparatus reset for next trial`,
+        `Trial #${logEntries.length}: θ = ${vals.angle.toFixed(1)}°, W = ${vals.weight.toFixed(1)} N, P = ${vals.pullForce.toFixed(2)} N, μ = ${muText} — Apparatus reset for next trial`,
         'View Data Log',
         'log'
       );
@@ -626,7 +626,7 @@
           <td class="mono">${i + 1}</td>
           <td class="mono">${entry.angle.toFixed(1)}</td>
           <td class="mono">${entry.weight.toFixed(1)}</td>
-          <td class="mono">${(entry.pullForce !== null ? entry.pullForce.toFixed(1) : '—')}</td>
+          <td class="mono">${(entry.pullForce !== null && entry.pullForce !== undefined ? Number(entry.pullForce).toFixed(2) : '—')}</td>
           <td class="mono ${entry.valid ? 'valid' : 'invalid'}">${muStr}</td>
           <td>${statusBadge}</td>
           <td><button class="btn btn-danger btn-sm" onclick="window._deleteLogEntry(${actualIdx}, this.closest('tr'))">✕</button></td>
@@ -801,7 +801,8 @@
 
       let csv = 'Trial,Method,Material,Angle (deg),Weight (N),Pull Force (N),mu,Valid\n';
       list.forEach((e, idx) => {
-        csv += `${idx + 1},"${e.method}","${e.material}",${e.angle},${e.weight},${e.pullForce ?? ''},${e.mu !== null ? e.mu.toFixed(4) : ''},${e.valid}\n`;
+        const pStr = (e.pullForce !== null && e.pullForce !== undefined) ? Number(e.pullForce).toFixed(2) : '';
+        csv += `${idx + 1},"${e.method}","${e.material}",${e.angle},${e.weight},${pStr},${e.mu !== null ? e.mu.toFixed(4) : ''},${e.valid}\n`;
       });
 
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -833,7 +834,7 @@
       filtered.forEach((e, i) => {
         text += method === 'repose'
           ? `${i + 1}\t${e.angle.toFixed(1)}\t${e.weight.toFixed(1)}\t${e.mu !== null ? e.mu.toFixed(4) : '—'}\t${e.valid ? 'Valid' : 'Invalid'}\n`
-          : `${i + 1}\t${e.angle.toFixed(1)}\t${e.weight.toFixed(1)}\t${e.pullForce !== null ? e.pullForce.toFixed(1) : '—'}\t${e.mu !== null ? e.mu.toFixed(4) : '—'}\t${e.valid ? 'Valid' : 'Invalid'}\n`;
+          : `${i + 1}\t${e.angle.toFixed(1)}\t${e.weight.toFixed(1)}\t${e.pullForce !== null && e.pullForce !== undefined ? Number(e.pullForce).toFixed(2) : '—'}\t${e.mu !== null ? e.mu.toFixed(4) : '—'}\t${e.valid ? 'Valid' : 'Invalid'}\n`;
       });
 
       navigator.clipboard.writeText(text).then(() => {
@@ -875,7 +876,7 @@
         const rad = angle * Math.PI / 180;
         const sampleWeights = [5.0, 10.0, 15.0, 20.0];
         sampleWeights.forEach(W => {
-          const P = +(W * (Math.sin(rad) + mid * Math.cos(rad))).toFixed(1);
+          const P = +(W * (Math.sin(rad) + mid * Math.cos(rad))).toFixed(2);
           addEntry({ method: 'friction', material: matKey, angle, weight: W, pullForce: P }, false);
         });
       }

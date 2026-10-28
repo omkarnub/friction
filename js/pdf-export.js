@@ -238,7 +238,7 @@
             cellX += colWidths[i];
           });
         } else {
-          const pStr = entry.pullForce !== null ? entry.pullForce.toFixed(1) + ' N' : '—';
+          const pStr = entry.pullForce !== null ? entry.pullForce.toFixed(2) + ' N' : '—';
           const rowData = [`${idx + 1}`, entry.angle.toFixed(1) + '°', entry.weight.toFixed(1) + ' N', pStr, muStr, statusStr];
           rowData.forEach((val, i) => {
             if (i === 4 || i === 5) {
