@@ -7,13 +7,12 @@
 [![Physics: Statics & Dynamics](https://img.shields.io/badge/Physics-Engineering%20Mechanics-ffb300?style=for-the-badge&logo=scikitlearn&logoColor=white)](https://github.com/omkarnub/friction)
 [![Cross-Method: 0.00% Deviation](https://img.shields.io/badge/Cross--Method-0.00%25%20Deviation-00e676?style=for-the-badge&logo=checkmarx&logoColor=white)](https://github.com/omkarnub/friction)
 [![PWA: Offline Ready](https://img.shields.io/badge/PWA-100%25%20Offline%20Ready-7c4dff?style=for-the-badge&logo=pwa&logoColor=white)](https://github.com/omkarnub/friction)
-[![Academic Year: 2026–27](https://img.shields.io/badge/Academic%20Year-2026--27-blue?style=for-the-badge)](https://github.com/omkarnub/friction)
 
 <p align="center">
   An interactive, browser-based virtual mechanics laboratory designed for engineering undergraduates to determine the <b>static coefficient of friction ($\mu_s$)</b> between diverse engineering material pairs using two fundamental experimental techniques: the <b>Angle of Repose</b> and the <b>Friction Plane with Pulley &amp; Hanging Pan</b>.
 </p>
 
-[**Explore Simulator**](#-key-features) • [**Physics Theory**](#-first-principles-physics--mechanics) • [**Apparatus Manual**](#-experimental-methods) • [**Data Logging &amp; PDF Export**](#-data-logging--laboratory-reporting) • [**Project Team**](#-project-team--mentorship)
+[**Explore Simulator**](#-key-features) • [**Physics Theory**](#-first-principles-physics--mechanics) • [**Apparatus Manual**](#-experimental-methods) • [**Data Logging &amp; PDF Export**](#-data-logging--laboratory-reporting)
 
 ---
 
@@ -170,35 +169,6 @@ node scripts/test-deterministic.js
 
 ---
 
-## 👥 Project Team & Mentorship
-
 <div align="center">
-
-### Project Mentor & Guide
-**Mr. Avinash Chavan**  
-*Department of Engineering Mechanics • Academic Year 2026–27*
-
-<br>
-
-### Lead Developer
-**Omkar Singh** ([@omkarnub](https://github.com/omkarnub))  
-*Roll No: 31 • Department of Information Technology*
-
-<br>
-
-### Development & Research Contributors
-| Contributor | Roll No | Department |
-| :--- | :---: | :--- |
-| **Mugdha Jagtap** | 09 | Information Technology |
-| **Pranav Kotkar** | 11 | Mechanical Engineering |
-| **Aayushi Mhaskar** | 15 | Electronics and Computer Science |
-| **Piyush Gupta** | 07 | Electronics and Computer Science |
-| **Harshit Sankhe** | 28 | Electronics &amp; Computer Science |
-
-</div>
-
----
-
-<div align="center">
-  <sub>Developed for the Department of Engineering Mechanics • Academic Year 2026–27</sub>
+  <sub>Engineering Mechanics Virtual Laboratory</sub>
 </div>
