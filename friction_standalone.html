@@ -2587,6 +2587,139 @@ td.invalid {
   line-height: 1.2;
 }
 
+/* ===================================================================
+   Simulator Header & Touch Drag Toggle Switch
+   =================================================================== */
+.sim-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.sim-header-bar .tabs {
+  margin-bottom: 0;
+}
+
+.sim-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.sim-touch-switch-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.38rem 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.sim-touch-switch-wrap:hover {
+  border-color: var(--accent-cyan);
+  color: var(--text-primary);
+}
+
+.sim-touch-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.sim-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+}
+
+.sim-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.sim-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.14);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+}
+
+.sim-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #ffffff;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.sim-switch input:checked + .sim-switch-slider {
+  background-color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+.sim-switch input:checked + .sim-switch-slider:before {
+  transform: translateX(18px);
+  background-color: #0b0b0f;
+}
+
+.sim-touch-status {
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: all var(--transition-fast);
+}
+
+.sim-touch-status.active {
+  background: rgba(0, 229, 255, 0.16);
+  color: var(--accent-cyan);
+}
+
+[data-theme="light"] .sim-touch-switch-wrap {
+  background: #ffffff;
+  border-color: #d1d9e2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .sim-switch-slider {
+  background-color: #cbd5e1;
+}
+
+[data-theme="light"] .sim-switch input:checked + .sim-switch-slider {
+  background-color: var(--accent-cyan);
+}
+
+[data-theme="light"] .sim-switch input:checked + .sim-switch-slider:before {
+  background-color: #ffffff;
+}
+
 /* Slider Stepper Controls (- / + buttons) & Track Wrap */
 .slider-control-row {
   display: flex;
@@ -6574,10 +6707,22 @@ html.theme-transitioning *::after {
         <!-- Simulator Toast Notification Container -->
         <div class="sim-toast-container" id="simToastContainer"></div>
 
-        <!-- Method tabs -->
-        <div class="tabs" id="simTabs">
-          <button class="tab-btn active" data-tab="repose">📐 Angle of Repose</button>
-          <button class="tab-btn" data-tab="friction">⚖ Friction Plane</button>
+        <!-- Simulator Header: Method Tabs & Touch Drag Interaction Switch -->
+        <div class="sim-header-bar">
+          <div class="tabs" id="simTabs">
+            <button class="tab-btn active" data-tab="repose">📐 Angle of Repose</button>
+            <button class="tab-btn" data-tab="friction">⚖ Friction Plane</button>
+          </div>
+          <div class="sim-header-actions">
+            <label class="sim-touch-switch-wrap" for="simTouchToggle" title="Enable/disable direct touch dragging on apparatus canvas">
+              <span class="sim-touch-label">Touch Drag:</span>
+              <div class="sim-switch">
+                <input type="checkbox" id="simTouchToggle" aria-label="Toggle direct touch drag on canvas">
+                <span class="sim-switch-slider"></span>
+              </div>
+              <span class="sim-touch-status" id="simTouchStatus">OFF</span>
+            </label>
+          </div>
         </div>
 
         <!-- Tab: Angle of Repose -->
@@ -9259,6 +9404,430 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   </script>
 
+  <!-- ══════════════ [Inlined: js/scroll-index.js] ══════════════ -->
+  <script>
+/**
+ * Scroll Index Component (Vanilla JS + CSS)
+ * Adapted from Kokonut UI ScrollIndex by @dorianbaffier
+ * 
+ * Features:
+ * - Proportional vertical tick rail based on heading scroll offsets
+ * - macOS Dock-style magnification swell near pointer
+ * - Scrub/drag rail to scroll page with momentum & snap physics
+ * - Smooth easeInOut jump on tick click
+ * - Section name flash bubble on scroll & hover
+ * - Fully accessible with keyboard navigation
+ */
+
+(function () {
+  'use strict';
+
+  const RAIL = 280;      // Rail height in px
+  const OFFSET = 80;     // Heading landing offset (clears fixed navbar)
+  const SWELL = 1.6;     // Magnification peak width
+  const REACH = 26;      // Reach radius in px for swell effect
+  const SNAP = 18;       // Snap threshold for flick settlement
+  const FLASH = 900;     // Milliseconds label stays up after entering section
+
+  function easeInOut(t) {
+    return t < 0.5 ? 8 * t ** 4 : 1 - (-2 * t + 2) ** 4 / 2;
+  }
+
+  function initScrollIndex() {
+    const homeSection = document.getElementById('page-home');
+    if (!homeSection) return;
+
+    // Selector for homepage landmark headings
+    const headingSelector = '.get-started-title, .learn-qa-question, .learn-method-title, .learn-point-title';
+
+    // Create Rail Navigation DOM
+    const nav = document.createElement('nav');
+    nav.className = 'scroll-index-nav';
+    nav.setAttribute('aria-label', 'Homepage Section Index');
+
+    const rail = document.createElement('div');
+    rail.className = 'scroll-index-rail';
+
+    const head = document.createElement('span');
+    head.className = 'scroll-index-head';
+    head.setAttribute('aria-hidden', 'true');
+
+    const label = document.createElement('span');
+    label.className = 'scroll-index-label';
+    label.setAttribute('aria-hidden', 'true');
+
+    rail.appendChild(head);
+    rail.appendChild(label);
+    nav.appendChild(rail);
+    document.body.appendChild(nav);
+
+    let list = [];
+    let start = 0;
+    let end = 1;
+    let active = -1;
+    let height = RAIL;
+    let raf = 0;
+    let tween = 0;
+    let flashTimer = 0;
+    let painted = false;
+    let hover = null;
+    let drag = null;
+    const swell = [];
+    let tickButtons = [];
+
+    const getRailHeight = () => rail.clientHeight || (window.innerWidth <= 420 ? 240 : window.innerWidth <= 768 ? 260 : RAIL);
+
+    const getScroll = () => window.scrollY || window.pageYOffset || document.documentElement.scrollTop;
+    const setScroll = (value) => window.scrollTo(0, value);
+
+    const isHomeActive = () => {
+      const splash = document.getElementById('splashScreen');
+      if (splash && !splash.classList.contains('dismissed') && splash.parentNode) {
+        return false;
+      }
+      const hash = (window.location.hash || '').toLowerCase();
+      return hash === '' || hash === '#home' || hash === '#';
+    };
+
+    const updateVisibility = () => {
+      if (isHomeActive()) {
+        nav.classList.add('visible');
+      } else {
+        nav.classList.remove('visible');
+      }
+    };
+
+    const measure = () => {
+      const scroll = getScroll();
+      const homeRect = homeSection.getBoundingClientRect();
+      const top = homeRect.top + scroll;
+      start = Math.max(top - OFFSET, 0);
+      end = Math.max(top + homeSection.offsetHeight - window.innerHeight, start + 1);
+
+      const headings = Array.from(homeSection.querySelectorAll(headingSelector));
+      list = headings.map(el => {
+        let text = el.textContent ? el.textContent.trim() : '';
+        // Clean up overly long questions for label badge
+        if (text.length > 32) {
+          text = text.slice(0, 30) + '…';
+        }
+        const level = Number(el.tagName.slice(1)) || 2;
+        const at = Math.min(Math.max(el.getBoundingClientRect().top + scroll - OFFSET, start), end);
+        const pos = end > start ? (at - start) / (end - start) : 0;
+        return { el, text, level, at, pos };
+      });
+
+      height = getRailHeight();
+
+      // Rebuild tick buttons if list size changed
+      if (tickButtons.length !== list.length) {
+        // Remove old ticks
+        tickButtons.forEach(btn => btn.remove());
+        tickButtons = [];
+
+        list.forEach((section, index) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = `scroll-index-tick ${section.level <= 2 ? 'major' : 'minor'}`;
+          btn.setAttribute('aria-label', section.text);
+          btn.dataset.state = 'ahead';
+          btn.style.top = `${(section.pos * 100).toFixed(3)}%`;
+
+          const bar = document.createElement('span');
+          bar.className = 'scroll-index-bar';
+          btn.appendChild(bar);
+
+          btn.addEventListener('click', (e) => {
+            if (e.detail === 0) { // Keyboard click
+              jump(index);
+            }
+          });
+
+          btn.addEventListener('focus', () => {
+            show(index);
+          });
+
+          btn.addEventListener('blur', () => {
+            label.style.opacity = '0';
+          });
+
+          btn.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+            e.preventDefault();
+            const next = Math.min(Math.max(index + (e.key === 'ArrowDown' ? 1 : -1), 0), list.length - 1);
+            if (tickButtons[next]) tickButtons[next].focus();
+          });
+
+          rail.appendChild(btn);
+          tickButtons.push(btn);
+        });
+      } else {
+        // Update positions
+        list.forEach((section, index) => {
+          if (tickButtons[index]) {
+            tickButtons[index].style.top = `${(section.pos * 100).toFixed(3)}%`;
+            tickButtons[index].setAttribute('aria-label', section.text);
+          }
+        });
+      }
+    };
+
+    const fraction = () => Math.min(Math.max((getScroll() - start) / (end - start), 0), 1);
+
+    const nearest = (y) => {
+      let best = -1;
+      let distance = Number.POSITIVE_INFINITY;
+      list.forEach((s, i) => {
+        const d = Math.abs(s.pos * height - y);
+        if (d < distance) {
+          distance = d;
+          best = i;
+        }
+      });
+      return { index: best, distance };
+    };
+
+    const placeLabel = (index, visible) => {
+      const section = list[index];
+      if (!section) {
+        label.style.opacity = '0';
+        return;
+      }
+      if (label.textContent !== section.text) {
+        label.textContent = section.text;
+      }
+      label.style.transform = `translate3d(0, ${(section.pos * height).toFixed(1)}px, 0) translateY(-50%)`;
+      label.style.opacity = visible ? '1' : '0';
+    };
+
+    const current = () => {
+      const scroll = getScroll() + 1;
+      let index = -1;
+      for (let i = 0; i < list.length; i++) {
+        if (list[i].at <= scroll) {
+          index = i;
+        }
+      }
+      return index;
+    };
+
+    const markTicks = (activeIdx) => {
+      tickButtons.forEach((tick, i) => {
+        if (!tick) return;
+        let state = 'ahead';
+        if (i === activeIdx) {
+          state = 'current';
+        } else if (i < activeIdx) {
+          state = 'passed';
+        }
+        tick.dataset.state = state;
+        tick.tabIndex = i === Math.max(activeIdx, 0) ? 0 : -1;
+        if (i === activeIdx) {
+          tick.setAttribute('aria-current', 'location');
+        } else {
+          tick.removeAttribute('aria-current');
+        }
+      });
+    };
+
+    const paint = () => {
+      raf = 0;
+      head.style.transform = `translate3d(0, ${(fraction() * height).toFixed(1)}px, 0)`;
+      const now = current();
+      if (now !== active) {
+        active = now;
+        markTicks(active);
+        // Scrolling into a new section flashes its name briefly
+        if (painted && hover === null && !drag && active >= 0) {
+          placeLabel(active, true);
+          window.clearTimeout(flashTimer);
+          flashTimer = window.setTimeout(() => {
+            if (hover === null && !drag) {
+              label.style.opacity = '0';
+            }
+          }, FLASH);
+        }
+      }
+
+      // Smooth dock magnification swell
+      let moving = false;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      tickButtons.forEach((tick, i) => {
+        if (!tick) return;
+        const y = (list[i]?.pos ?? 0) * height;
+        const target = hover === null || reduceMotion
+          ? 1
+          : 1 + SWELL * Math.exp(-((hover - y) ** 2) / (2 * REACH * REACH));
+        const val = (swell[i] ?? 1) + (target - (swell[i] ?? 1)) * 0.35;
+        swell[i] = Math.abs(val - target) < 0.005 ? target : val;
+        moving = moving || swell[i] !== target;
+        tick.style.setProperty('--swell', swell[i].toFixed(3));
+      });
+
+      painted = true;
+      if (moving) {
+        schedule();
+      }
+    };
+
+    function schedule() {
+      if (!raf) {
+        raf = requestAnimationFrame(paint);
+      }
+    }
+
+    const stopTween = () => {
+      cancelAnimationFrame(tween);
+      tween = 0;
+    };
+
+    const scrollToTarget = (target) => {
+      stopTween();
+      const from = getScroll();
+      const to = Math.min(Math.max(target, 0), end);
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduceMotion || Math.abs(to - from) < 2) {
+        setScroll(to);
+        return;
+      }
+      const duration = Math.min(Math.max(260 + Math.abs(to - from) * 0.12, 300), 650);
+      const begin = performance.now();
+      const step = (now) => {
+        const t = Math.min((now - begin) / duration, 1);
+        setScroll(from + (to - from) * easeInOut(t));
+        tween = t < 1 ? requestAnimationFrame(step) : 0;
+      };
+      tween = requestAnimationFrame(step);
+    };
+
+    const jump = (index) => {
+      const section = list[index];
+      if (section) {
+        scrollToTarget(section.at);
+      }
+    };
+
+    const show = (index) => {
+      hover = (list[index]?.pos ?? 0) * height;
+      placeLabel(index, true);
+      schedule();
+    };
+
+    const railY = (event) => Math.min(Math.max(event.clientY - rail.getBoundingClientRect().top, 0), height);
+    const scrub = (y) => setScroll(start + (y / height) * (end - start));
+
+    const onDown = (event) => {
+      if (drag || (event.pointerType === 'mouse' && event.button !== 0)) return;
+      event.preventDefault();
+      rail.setPointerCapture(event.pointerId);
+      stopTween();
+      const y = railY(event);
+      drag = { id: event.pointerId, moved: false, y, t: event.timeStamp, v: 0 };
+      hover = y;
+      rail.dataset.dragging = '';
+      placeLabel(nearest(y).index, true);
+      schedule();
+    };
+
+    const onMove = (event) => {
+      const y = railY(event);
+      if (drag && event.pointerId === drag.id) {
+        const dt = Math.max(event.timeStamp - drag.t, 1);
+        drag.v = drag.v * 0.4 + ((y - drag.y) / dt) * 0.6;
+        drag.moved = drag.moved || Math.abs(y - drag.y) > 3;
+        drag.y = y;
+        drag.t = event.timeStamp;
+        if (drag.moved) {
+          scrub(y);
+        }
+      } else if (event.pointerType !== 'mouse') {
+        return;
+      }
+      hover = y;
+      placeLabel(nearest(y).index, true);
+      schedule();
+    };
+
+    const onUp = (event) => {
+      if (!drag || event.pointerId !== drag.id) return;
+      const { moved, y, v } = drag;
+      drag = null;
+      delete rail.dataset.dragging;
+      if (event.pointerType !== 'mouse') {
+        hover = null;
+        window.clearTimeout(flashTimer);
+        flashTimer = window.setTimeout(() => {
+          placeLabel(-1, false);
+        }, 1100);
+      }
+      const projected = moved ? y + v * 120 : y;
+      const hit = nearest(projected);
+      if (hit.index >= 0 && (!moved || hit.distance < SNAP)) {
+        jump(hit.index);
+      }
+      schedule();
+    };
+
+    const onLeave = () => {
+      if (drag) return;
+      hover = null;
+      placeLabel(-1, false);
+      schedule();
+    };
+
+    const onScroll = () => schedule();
+    const onInput = () => stopTween();
+
+    measure();
+    paint();
+    updateVisibility();
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('wheel', onInput, { passive: true });
+    window.addEventListener('touchstart', onInput, { passive: true });
+    window.addEventListener('resize', () => {
+      measure();
+      updateVisibility();
+      schedule();
+    });
+    window.addEventListener('hashchange', () => {
+      updateVisibility();
+      measure();
+      schedule();
+    });
+    window.addEventListener('pagechange', () => {
+      updateVisibility();
+      measure();
+      schedule();
+    });
+
+    const enterBtn = document.getElementById('enterAppBtn');
+    if (enterBtn) {
+      enterBtn.addEventListener('click', () => {
+        setTimeout(() => {
+          measure();
+          updateVisibility();
+          schedule();
+        }, 550);
+      });
+    }
+
+    rail.addEventListener('pointerdown', onDown);
+    rail.addEventListener('pointermove', onMove);
+    rail.addEventListener('pointerup', onUp);
+    rail.addEventListener('pointercancel', onUp);
+    rail.addEventListener('pointerleave', onLeave);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initScrollIndex);
+  } else {
+    initScrollIndex();
+  }
+})();
+
+  </script>
+
   <!-- ══════════════ [Inlined: js/theory.js] ══════════════ -->
   <script>
 /**
@@ -9365,7 +9934,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
 
   <!-- ══════════════ [Inlined: js/simulate.js] ══════════════ -->
   <script>
-/**
+﻿/**
  * simulate.js — High-Precision Physics Simulator for Virtual Mechanics Lab
  * Features:
  * - Real-time physics calculations with zero margin for error
@@ -10053,6 +10622,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     `;
 
     updateReposeSVG();
+    bindCanvasTouchControls();
   }
 
   let inReposeAngleUpdate = false;
@@ -10378,12 +10948,13 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
         <!-- Pulley Wheel Assembly -->
         <g id="frictionPulleyWheel" transform="translate(${F_PIVOT.x + F_PLANE_LEN + 14}, ${F_PIVOT.y - 8})">
           <circle cx="0" cy="0" r="${PULLEY_R}" fill="rgba(8, 14, 26, 0.95)" stroke="var(--accent-cyan)" stroke-width="2"/>
-          <circle cx="0" cy="0" r="${PULLEY_R - 4}" fill="none" stroke="rgba(0, 229, 255, 0.45)" stroke-width="1" stroke-dasharray="3,3"/>
+          <circle cx="0" cy="0" r="${PULLEY_R - 3.5}" fill="none" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1"/>
           <g id="pulleySpokes">
-            <line x1="-10" y1="0" x2="10" y2="0" stroke="rgba(0, 229, 255, 0.6)" stroke-width="1"/>
-            <line x1="0" y1="-10" x2="0" y2="10" stroke="rgba(0, 229, 255, 0.6)" stroke-width="1"/>
+            <line x1="-9" y1="0" x2="9" y2="0" stroke="rgba(200, 225, 245, 0.55)" stroke-width="1.2"/>
+            <line x1="0" y1="-9" x2="0" y2="9" stroke="rgba(200, 225, 245, 0.55)" stroke-width="1.2"/>
           </g>
-          <circle cx="0" cy="0" r="3" fill="var(--accent-cyan)"/>
+          <circle cx="0" cy="0" r="3.5" fill="var(--accent-cyan)"/>
+          <circle cx="0" cy="0" r="1.5" fill="#ffffff"/>
         </g>
 
         <!-- Block Assembly on Plane -->
@@ -10450,6 +11021,7 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     `;
 
     updateFrictionSVG();
+    bindCanvasTouchControls();
   }
 
   let inFrictionForceUpdate = false;
@@ -11197,6 +11769,153 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     };
   };
 
+  
+  /* ================================================================
+     Touch Drag Mode Toggle Switch (Direct Incline / Pan Manipulation)
+     ================================================================ */
+  let touchDragEnabled = false;
+
+  const simTouchToggle = document.getElementById('simTouchToggle');
+  const simTouchStatus = document.getElementById('simTouchStatus');
+
+  function setTouchDragMode(enabled) {
+    touchDragEnabled = !!enabled;
+    if (simTouchToggle) simTouchToggle.checked = touchDragEnabled;
+    if (simTouchStatus) {
+      simTouchStatus.textContent = touchDragEnabled ? 'ON' : 'OFF';
+      simTouchStatus.classList.toggle('active', touchDragEnabled);
+    }
+    try {
+      localStorage.setItem('fl-touch-drag', touchDragEnabled.toString());
+    } catch (e) {}
+
+    const reposeSvg = document.getElementById('reposeSvg');
+    const frictionSvg = document.getElementById('frictionSvg');
+    const cursor = touchDragEnabled ? 'grab' : '';
+    if (reposeSvg) reposeSvg.style.cursor = cursor;
+    if (frictionSvg) frictionSvg.style.cursor = cursor;
+  }
+
+  try {
+    const savedTouch = localStorage.getItem('fl-touch-drag');
+    if (savedTouch === 'true') {
+      setTouchDragMode(true);
+    }
+  } catch (e) {}
+
+  if (simTouchToggle) {
+    simTouchToggle.addEventListener('change', () => {
+      setTouchDragMode(simTouchToggle.checked);
+      if (window.showSimToast) {
+        showSimToast(
+          touchDragEnabled ? 'Touch Drag Enabled' : 'Touch Drag Disabled',
+          touchDragEnabled
+            ? 'Drag anywhere on the apparatus canvas to adjust angle or load'
+            : 'Direct touch on canvas disabled — use controls & sliders'
+        );
+      }
+    });
+  }
+
+  function bindCanvasTouchControls() {
+    // 1. Repose Canvas Touch Dragging
+    const reposeSvg = document.getElementById('reposeSvg');
+    if (reposeSvg && !reposeSvg._touchBound) {
+      reposeSvg._touchBound = true;
+      let isDragging = false;
+
+      function onDown(e) {
+        if (!touchDragEnabled) return;
+        if (e.button !== undefined && e.button !== 0) return;
+        const rect = reposeSvg.getBoundingClientRect();
+        const ptX = ((e.clientX - rect.left) / rect.width) * 600;
+        const ptY = ((e.clientY - rect.top) / rect.height) * 400;
+
+        if (ptX > R_PIVOT.x + 20 && ptY < R_PIVOT.y + 20) {
+          isDragging = true;
+          reposeSvg.style.cursor = 'grabbing';
+          if (e.setPointerCapture && e.pointerId !== undefined) {
+            try { reposeSvg.setPointerCapture(e.pointerId); } catch (err) {}
+          }
+          e.preventDefault();
+        }
+      }
+
+      function onMove(e) {
+        if (!isDragging || !touchDragEnabled) return;
+        const rect = reposeSvg.getBoundingClientRect();
+        const ptX = ((e.clientX - rect.left) / rect.width) * 600;
+        const ptY = ((e.clientY - rect.top) / rect.height) * 400;
+        const dx = ptX - R_PIVOT.x;
+        const dy = R_PIVOT.y - ptY;
+        if (dx > 30) {
+          const rad = Math.atan2(dy, dx);
+          let deg = toDeg(rad);
+          deg = Math.max(0, Math.min(89, deg));
+          applyReposeAngle(parseFloat(deg.toFixed(1)));
+        }
+      }
+
+      function onUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        reposeSvg.style.cursor = touchDragEnabled ? 'grab' : '';
+      }
+
+      reposeSvg.addEventListener('pointerdown', onDown);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    }
+
+    // 2. Friction Canvas Touch Dragging
+    const frictionSvg = document.getElementById('frictionSvg');
+    if (frictionSvg && !frictionSvg._touchBound) {
+      frictionSvg._touchBound = true;
+      let isDragging = false;
+      let startY = 0;
+      let startForce = 0;
+
+      function onDown(e) {
+        if (!touchDragEnabled) return;
+        if (e.button !== undefined && e.button !== 0) return;
+        const rect = frictionSvg.getBoundingClientRect();
+        const ptX = ((e.clientX - rect.left) / rect.width) * 600;
+        const ptY = ((e.clientY - rect.top) / rect.height) * 400;
+
+        if (ptX > 380 && ptY > 20) {
+          isDragging = true;
+          startY = e.clientY;
+          startForce = parseFloat(frictionForceSlider.value) || 0;
+          frictionSvg.style.cursor = 'grabbing';
+          if (e.setPointerCapture && e.pointerId !== undefined) {
+            try { frictionSvg.setPointerCapture(e.pointerId); } catch (err) {}
+          }
+          e.preventDefault();
+        }
+      }
+
+      function onMove(e) {
+        if (!isDragging || !touchDragEnabled) return;
+        const dy = e.clientY - startY;
+        const deltaForce = dy * 0.15;
+        const nextForce = Math.max(0, startForce + deltaForce);
+        applyFrictionForce(nextForce);
+      }
+
+      function onUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        frictionSvg.style.cursor = touchDragEnabled ? 'grab' : '';
+      }
+
+      frictionSvg.addEventListener('pointerdown', onDown);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    }
+  }
+
   /* ================================================================
      Initial Render
      ================================================================ */
@@ -11205,8 +11924,10 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
   updateReposeReadout();
   renderFrictionSVG();
   updateFrictionReadout();
+  bindCanvasTouchControls();
 })();
-</script>
+
+  </script>
 
   <!-- ══════════════ [Inlined: js/haptics.js] ══════════════ -->
   <script>
@@ -12246,7 +12967,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     }
   });
 })();
-</script>
+
+  </script>
 
   <!-- ══════════════ [Inlined: js/compare.js] ══════════════ -->
   <script>
@@ -12802,7 +13524,8 @@ function(t){t.__bidiEngine__=t.prototype.__bidiEngine__=function(t){var r,n,i,a,
     doc.save(filename);
   }
 })();
-</script>
+
+  </script>
 
   <!-- ══════════════ [Inlined: js/staggered-menu.bundle.js] ══════════════ -->
   <script>

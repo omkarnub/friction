@@ -2566,6 +2566,139 @@ td.invalid {
   line-height: 1.2;
 }
 
+/* ===================================================================
+   Simulator Header & Touch Drag Toggle Switch
+   =================================================================== */
+.sim-header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.sim-header-bar .tabs {
+  margin-bottom: 0;
+}
+
+.sim-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.sim-touch-switch-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.38rem 0.85rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+}
+
+.sim-touch-switch-wrap:hover {
+  border-color: var(--accent-cyan);
+  color: var(--text-primary);
+}
+
+.sim-touch-label {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.sim-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+}
+
+.sim-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.sim-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.14);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  border: 1px solid var(--border-subtle);
+}
+
+.sim-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 14px;
+  width: 14px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #ffffff;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.sim-switch input:checked + .sim-switch-slider {
+  background-color: var(--accent-cyan);
+  border-color: var(--accent-cyan);
+}
+
+.sim-switch input:checked + .sim-switch-slider:before {
+  transform: translateX(18px);
+  background-color: #0b0b0f;
+}
+
+.sim-touch-status {
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  transition: all var(--transition-fast);
+}
+
+.sim-touch-status.active {
+  background: rgba(0, 229, 255, 0.16);
+  color: var(--accent-cyan);
+}
+
+[data-theme="light"] .sim-touch-switch-wrap {
+  background: #ffffff;
+  border-color: #d1d9e2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .sim-switch-slider {
+  background-color: #cbd5e1;
+}
+
+[data-theme="light"] .sim-switch input:checked + .sim-switch-slider {
+  background-color: var(--accent-cyan);
+}
+
+[data-theme="light"] .sim-switch input:checked + .sim-switch-slider:before {
+  background-color: #ffffff;
+}
+
 /* Slider Stepper Controls (- / + buttons) & Track Wrap */
 .slider-control-row {
   display: flex;

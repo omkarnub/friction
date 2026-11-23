@@ -1,4 +1,4 @@
-const CACHE = "mech-lab-v16";
+const CACHE = "mech-lab-v17";
 
 const CORE_ASSETS = [
   "./",
@@ -9,10 +9,12 @@ const CORE_ASSETS = [
   "./js/staggered-menu.bundle.js",
   "./js/staggered-menu.bundle.css",
   "./js/simulate.js",
+  "./js/haptics.js",
   "./js/data-log.js",
   "./js/compare.js",
   "./js/theory.js",
   "./js/pdf-export.js",
+  "./js/jspdf.umd.min.js",
   "./js/home-showcase.js",
   "./js/scroll-index.js",
   "./js/get-started-bg.js",

@@ -1065,10 +1065,22 @@
         <!-- Simulator Toast Notification Container -->
         <div class="sim-toast-container" id="simToastContainer"></div>
 
-        <!-- Method tabs -->
-        <div class="tabs" id="simTabs">
-          <button class="tab-btn active" data-tab="repose">📐 Angle of Repose</button>
-          <button class="tab-btn" data-tab="friction">⚖ Friction Plane</button>
+        <!-- Simulator Header: Method Tabs & Touch Drag Interaction Switch -->
+        <div class="sim-header-bar">
+          <div class="tabs" id="simTabs">
+            <button class="tab-btn active" data-tab="repose">📐 Angle of Repose</button>
+            <button class="tab-btn" data-tab="friction">⚖ Friction Plane</button>
+          </div>
+          <div class="sim-header-actions">
+            <label class="sim-touch-switch-wrap" for="simTouchToggle" title="Enable/disable direct touch dragging on apparatus canvas">
+              <span class="sim-touch-label">Touch Drag:</span>
+              <div class="sim-switch">
+                <input type="checkbox" id="simTouchToggle" aria-label="Toggle direct touch drag on canvas">
+                <span class="sim-switch-slider"></span>
+              </div>
+              <span class="sim-touch-status" id="simTouchStatus">OFF</span>
+            </label>
+          </div>
         </div>
 
         <!-- Tab: Angle of Repose -->
@@ -2450,7 +2462,7 @@
   <!-- ════════════════════════════════════════════════════════════════
        Scripts
        ════════════════════════════════════════════════════════════════ -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="js/jspdf.umd.min.js"></script>
   <script src="js/gsap.min.js?v=2"></script>
   <script src="js/ScrollTrigger.min.js?v=2"></script>
   <script src="js/home-showcase.js?v=7"></script>

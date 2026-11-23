@@ -1,4 +1,4 @@
-/**
+﻿/**
  * simulate.js — High-Precision Physics Simulator for Virtual Mechanics Lab
  * Features:
  * - Real-time physics calculations with zero margin for error
@@ -686,6 +686,7 @@
     `;
 
     updateReposeSVG();
+    bindCanvasTouchControls();
   }
 
   let inReposeAngleUpdate = false;
@@ -1011,12 +1012,13 @@
         <!-- Pulley Wheel Assembly -->
         <g id="frictionPulleyWheel" transform="translate(${F_PIVOT.x + F_PLANE_LEN + 14}, ${F_PIVOT.y - 8})">
           <circle cx="0" cy="0" r="${PULLEY_R}" fill="rgba(8, 14, 26, 0.95)" stroke="var(--accent-cyan)" stroke-width="2"/>
-          <circle cx="0" cy="0" r="${PULLEY_R - 4}" fill="none" stroke="rgba(0, 229, 255, 0.45)" stroke-width="1" stroke-dasharray="3,3"/>
+          <circle cx="0" cy="0" r="${PULLEY_R - 3.5}" fill="none" stroke="rgba(255, 255, 255, 0.22)" stroke-width="1"/>
           <g id="pulleySpokes">
-            <line x1="-10" y1="0" x2="10" y2="0" stroke="rgba(0, 229, 255, 0.6)" stroke-width="1"/>
-            <line x1="0" y1="-10" x2="0" y2="10" stroke="rgba(0, 229, 255, 0.6)" stroke-width="1"/>
+            <line x1="-9" y1="0" x2="9" y2="0" stroke="rgba(200, 225, 245, 0.55)" stroke-width="1.2"/>
+            <line x1="0" y1="-9" x2="0" y2="9" stroke="rgba(200, 225, 245, 0.55)" stroke-width="1.2"/>
           </g>
-          <circle cx="0" cy="0" r="3" fill="var(--accent-cyan)"/>
+          <circle cx="0" cy="0" r="3.5" fill="var(--accent-cyan)"/>
+          <circle cx="0" cy="0" r="1.5" fill="#ffffff"/>
         </g>
 
         <!-- Block Assembly on Plane -->
@@ -1083,6 +1085,7 @@
     `;
 
     updateFrictionSVG();
+    bindCanvasTouchControls();
   }
 
   let inFrictionForceUpdate = false;
@@ -1830,6 +1833,153 @@
     };
   };
 
+  
+  /* ================================================================
+     Touch Drag Mode Toggle Switch (Direct Incline / Pan Manipulation)
+     ================================================================ */
+  let touchDragEnabled = false;
+
+  const simTouchToggle = document.getElementById('simTouchToggle');
+  const simTouchStatus = document.getElementById('simTouchStatus');
+
+  function setTouchDragMode(enabled) {
+    touchDragEnabled = !!enabled;
+    if (simTouchToggle) simTouchToggle.checked = touchDragEnabled;
+    if (simTouchStatus) {
+      simTouchStatus.textContent = touchDragEnabled ? 'ON' : 'OFF';
+      simTouchStatus.classList.toggle('active', touchDragEnabled);
+    }
+    try {
+      localStorage.setItem('fl-touch-drag', touchDragEnabled.toString());
+    } catch (e) {}
+
+    const reposeSvg = document.getElementById('reposeSvg');
+    const frictionSvg = document.getElementById('frictionSvg');
+    const cursor = touchDragEnabled ? 'grab' : '';
+    if (reposeSvg) reposeSvg.style.cursor = cursor;
+    if (frictionSvg) frictionSvg.style.cursor = cursor;
+  }
+
+  try {
+    const savedTouch = localStorage.getItem('fl-touch-drag');
+    if (savedTouch === 'true') {
+      setTouchDragMode(true);
+    }
+  } catch (e) {}
+
+  if (simTouchToggle) {
+    simTouchToggle.addEventListener('change', () => {
+      setTouchDragMode(simTouchToggle.checked);
+      if (window.showSimToast) {
+        showSimToast(
+          touchDragEnabled ? 'Touch Drag Enabled' : 'Touch Drag Disabled',
+          touchDragEnabled
+            ? 'Drag anywhere on the apparatus canvas to adjust angle or load'
+            : 'Direct touch on canvas disabled — use controls & sliders'
+        );
+      }
+    });
+  }
+
+  function bindCanvasTouchControls() {
+    // 1. Repose Canvas Touch Dragging
+    const reposeSvg = document.getElementById('reposeSvg');
+    if (reposeSvg && !reposeSvg._touchBound) {
+      reposeSvg._touchBound = true;
+      let isDragging = false;
+
+      function onDown(e) {
+        if (!touchDragEnabled) return;
+        if (e.button !== undefined && e.button !== 0) return;
+        const rect = reposeSvg.getBoundingClientRect();
+        const ptX = ((e.clientX - rect.left) / rect.width) * 600;
+        const ptY = ((e.clientY - rect.top) / rect.height) * 400;
+
+        if (ptX > R_PIVOT.x + 20 && ptY < R_PIVOT.y + 20) {
+          isDragging = true;
+          reposeSvg.style.cursor = 'grabbing';
+          if (e.setPointerCapture && e.pointerId !== undefined) {
+            try { reposeSvg.setPointerCapture(e.pointerId); } catch (err) {}
+          }
+          e.preventDefault();
+        }
+      }
+
+      function onMove(e) {
+        if (!isDragging || !touchDragEnabled) return;
+        const rect = reposeSvg.getBoundingClientRect();
+        const ptX = ((e.clientX - rect.left) / rect.width) * 600;
+        const ptY = ((e.clientY - rect.top) / rect.height) * 400;
+        const dx = ptX - R_PIVOT.x;
+        const dy = R_PIVOT.y - ptY;
+        if (dx > 30) {
+          const rad = Math.atan2(dy, dx);
+          let deg = toDeg(rad);
+          deg = Math.max(0, Math.min(89, deg));
+          applyReposeAngle(parseFloat(deg.toFixed(1)));
+        }
+      }
+
+      function onUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        reposeSvg.style.cursor = touchDragEnabled ? 'grab' : '';
+      }
+
+      reposeSvg.addEventListener('pointerdown', onDown);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    }
+
+    // 2. Friction Canvas Touch Dragging
+    const frictionSvg = document.getElementById('frictionSvg');
+    if (frictionSvg && !frictionSvg._touchBound) {
+      frictionSvg._touchBound = true;
+      let isDragging = false;
+      let startY = 0;
+      let startForce = 0;
+
+      function onDown(e) {
+        if (!touchDragEnabled) return;
+        if (e.button !== undefined && e.button !== 0) return;
+        const rect = frictionSvg.getBoundingClientRect();
+        const ptX = ((e.clientX - rect.left) / rect.width) * 600;
+        const ptY = ((e.clientY - rect.top) / rect.height) * 400;
+
+        if (ptX > 380 && ptY > 20) {
+          isDragging = true;
+          startY = e.clientY;
+          startForce = parseFloat(frictionForceSlider.value) || 0;
+          frictionSvg.style.cursor = 'grabbing';
+          if (e.setPointerCapture && e.pointerId !== undefined) {
+            try { frictionSvg.setPointerCapture(e.pointerId); } catch (err) {}
+          }
+          e.preventDefault();
+        }
+      }
+
+      function onMove(e) {
+        if (!isDragging || !touchDragEnabled) return;
+        const dy = e.clientY - startY;
+        const deltaForce = dy * 0.15;
+        const nextForce = Math.max(0, startForce + deltaForce);
+        applyFrictionForce(nextForce);
+      }
+
+      function onUp() {
+        if (!isDragging) return;
+        isDragging = false;
+        frictionSvg.style.cursor = touchDragEnabled ? 'grab' : '';
+      }
+
+      frictionSvg.addEventListener('pointerdown', onDown);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
+    }
+  }
+
   /* ================================================================
      Initial Render
      ================================================================ */
@@ -1838,4 +1988,5 @@
   updateReposeReadout();
   renderFrictionSVG();
   updateFrictionReadout();
+  bindCanvasTouchControls();
 })();

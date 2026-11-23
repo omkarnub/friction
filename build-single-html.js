@@ -191,6 +191,7 @@ const jsFiles = [
   { name: 'js/gsap.min.js', file: path.join(rootDir, 'js', 'gsap.min.js') },
   { name: 'js/ScrollTrigger.min.js', file: path.join(rootDir, 'js', 'ScrollTrigger.min.js') },
   { name: 'js/home-showcase.js', file: path.join(rootDir, 'js', 'home-showcase.js') },
+  { name: 'js/scroll-index.js', file: path.join(rootDir, 'js', 'scroll-index.js') },
   { name: 'js/theory.js', file: path.join(rootDir, 'js', 'theory.js') },
   { name: 'js/simulate.js', file: path.join(rootDir, 'js', 'simulate.js') },
   { name: 'js/haptics.js', file: path.join(rootDir, 'js', 'haptics.js') },
