@@ -10000,3 +10000,65 @@ body.pre-launch .aih-root {
   color: #ef4444;
   animation: aihMicPulse 1.15s ease-in-out infinite;
 }
+
+/* === GEMINI-STYLE VOICE-REACTIVE AURORA UNDERGLOW === */
+
+.aih-form {
+  position: relative;
+  z-index: 2;
+  --voice-lvl: 0;
+  overflow: visible;
+}
+.aih-form > *:not(.aih-aurora-glow) {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes aihAuroraFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.aih-aurora-glow {
+  position: absolute;
+  left: -10px;
+  right: -10px;
+  bottom: -6px;
+  height: calc(36px + var(--voice-lvl, 0) * 34px);
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #06b6d4, #6366f1, #38bdf8, #a855f7);
+  background-size: 260% 260%;
+  filter: blur(calc(14px + var(--voice-lvl, 0) * 10px));
+  opacity: 0;
+  transform: scaleY(0.5);
+  transform-origin: bottom center;
+  pointer-events: none;
+  z-index: 0;
+  transition: opacity 0.28s ease, height 0.08s linear, transform 0.12s ease;
+}
+
+.aih-form.is-voice-active .aih-aurora-glow {
+  opacity: calc(0.42 + var(--voice-lvl, 0) * 0.52);
+  transform: scaleY(calc(0.85 + var(--voice-lvl, 0) * 0.65));
+  animation: aihAuroraFlow 3.2s ease infinite;
+}
+
+.aih-form.is-voice-active {
+  border-top-color: rgba(139, 92, 246, 0.55);
+}
+.aih-form.is-voice-active .aih-input {
+  border-color: rgba(96, 165, 250, 0.65);
+  background: rgba(10, 10, 12, 0.72);
+}
+[data-theme="light"] .aih-form.is-voice-active .aih-input {
+  background: rgba(247, 242, 235, 0.88);
+}
+
+/* Override red mic ring into glowing aurora-indigo pulse when active */
+.aih-mic-btn.is-listening {
+  border-color: #60a5fa !important;
+  background: rgba(96, 165, 250, 0.16) !important;
+  color: #60a5fa !important;
+  box-shadow: 0 0 calc(8px + var(--voice-lvl, 0) * 18px) rgba(96, 165, 250, 0.65) !important;
+  animation: none !important;
+}

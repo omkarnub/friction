@@ -687,6 +687,7 @@
         </div>
 
         <form class="aih-form" id="aiHelperForm" autocomplete="off">
+          <div class="aih-aurora-glow" id="aiHelperAurora" aria-hidden="true"></div>
           <input type="text" class="aih-input" id="aiHelperInput" placeholder="Ask about friction physics…" maxlength="450" aria-label="Ask a friction physics question">
           <button type="button" class="aih-mic-btn" id="aiHelperMic" title="Speak your question or command" aria-label="Voice input"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5.5" y="1.8" width="5" height="8" rx="2.5"/><path d="M3.2 7.8a4.8 4.8 0 0 0 9.6 0M8 12.6V14.5M5.8 14.5h4.4"/></svg></button>
           <button type="submit" class="aih-send-btn" id="aiHelperSend" aria-label="Send message">
@@ -829,51 +830,93 @@
       }
     }
 
-    // Push-to-Talk Mic (SpeechRecognition)
+    // Push-to-Talk Mic (Continuous SpeechRecognition + Real-Time Web Audio Aurora Underglow)
     const micBtn = document.getElementById('aiHelperMic');
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let micStream = null;
+    let micAudioCtx = null;
+    let micRaf = 0;
+    let silenceTimer = null;
+
+    function stopMicVisualizer() {
+      if (micRaf) { cancelAnimationFrame(micRaf); micRaf = 0; }
+      if (micStream) {
+        try { micStream.getTracks().forEach(t => t.stop()); } catch (e) {}
+        micStream = null;
+      }
+      if (micAudioCtx) {
+        try { micAudioCtx.close(); } catch (e) {}
+        micAudioCtx = null;
+      }
+      form.classList.remove('is-voice-active');
+      form.style.setProperty('--voice-lvl', '0');
+    }
+
+    async function startMicVisualizer() {
+      form.classList.add('is-voice-active');
+      let analyser = null;
+      let dataArr = null;
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) {
+            micAudioCtx = new AC();
+            const src = micAudioCtx.createMediaStreamSource(micStream);
+            analyser = micAudioCtx.createAnalyser();
+            analyser.fftSize = 64;
+            analyser.smoothingTimeConstant = 0.72;
+            src.connect(analyser);
+            dataArr = new Uint8Array(analyser.frequencyBinCount);
+          }
+        } catch (e) {
+          // Graceful fallback to smooth harmonic aurora pulse if getUserMedia is restricted
+        }
+      }
+
+      let t = 0;
+      const tick = () => {
+        if (!isListening) return;
+        t += 0.08;
+        let lvl = 0.22 + Math.sin(t) * 0.14;
+        if (analyser && dataArr) {
+          analyser.getByteFrequencyData(dataArr);
+          let sum = 0;
+          for (let i = 0; i < dataArr.length; i++) sum += dataArr[i];
+          const avg = sum / dataArr.length / 255;
+          lvl = Math.min(1, Math.max(0.14, avg * 2.6));
+        }
+        form.style.setProperty('--voice-lvl', lvl.toFixed(3));
+        micRaf = requestAnimationFrame(tick);
+      };
+      micRaf = requestAnimationFrame(tick);
+    }
+
+    function showVoiceHint(msg) {
+      const prev = input.placeholder;
+      input.placeholder = msg;
+      setTimeout(() => {
+        if (!isListening) input.placeholder = 'Ask about friction physics…';
+      }, 3600);
+    }
+
     if (micBtn) {
       if (!SR) {
         micBtn.style.display = 'none';
       } else {
-        recognition = new SR();
-        recognition.lang = 'en-US';
-        recognition.interimResults = true;
-        recognition.maxAlternatives = 1;
-
         let finalTranscript = '';
+        let manualStop = false;
 
-        recognition.onstart = () => {
-          isListening = true;
-          finalTranscript = '';
-          stopSpeaking();
-          micBtn.classList.add('is-listening');
-          input.placeholder = 'Listening… speak now';
-        };
-
-        recognition.onresult = (event) => {
-          let interim = '';
-          for (let i = event.resultIndex; i < event.results.length; i++) {
-            const tr = event.results[i][0].transcript;
-            if (event.results[i].isFinal) finalTranscript += tr;
-            else interim += tr;
-          }
-          input.value = (finalTranscript + interim).trim();
-        };
-
-        recognition.onerror = () => {
+        function finishVoiceSession(shouldSend) {
+          clearTimeout(silenceTimer);
+          silenceTimer = null;
           isListening = false;
           micBtn.classList.remove('is-listening');
-          input.placeholder = 'Ask about friction physics…';
-        };
-
-        recognition.onend = () => {
-          isListening = false;
-          micBtn.classList.remove('is-listening');
+          stopMicVisualizer();
           input.placeholder = 'Ask about friction physics…';
           const spoken = (finalTranscript || input.value || '').trim();
-          if (spoken) {
-            // Auto-enable spoken reply if user asked by voice and speechSynthesis exists
+          if (shouldSend && spoken) {
             if (voiceBtn && !voiceOutEnabled && 'speechSynthesis' in window) {
               voiceOutEnabled = true;
               voiceBtn.setAttribute('aria-pressed', 'true');
@@ -881,14 +924,90 @@
             }
             sendMessage(spoken);
           }
-        };
+        }
+
+        function startVoiceSession() {
+          if (isBusy) return;
+          stopSpeaking();
+          finalTranscript = '';
+          manualStop = false;
+          input.value = '';
+
+          try {
+            recognition = new SR();
+            recognition.lang = 'en-US';
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+              isListening = true;
+              micBtn.classList.add('is-listening');
+              input.placeholder = 'Listening… speak now (tap mic to send)';
+              startMicVisualizer();
+            };
+
+            recognition.onresult = (event) => {
+              let interim = '';
+              finalTranscript = '';
+              for (let i = 0; i < event.results.length; i++) {
+                const tr = event.results[i][0].transcript;
+                if (event.results[i].isFinal) finalTranscript += tr + ' ';
+                else interim += tr;
+              }
+              input.value = (finalTranscript + interim).trim();
+
+              // Auto-send smoothly after 2.1s of silence once user has spoken
+              clearTimeout(silenceTimer);
+              if (input.value.trim().length > 1) {
+                silenceTimer = setTimeout(() => {
+                  if (isListening && recognition) {
+                    manualStop = true;
+                    try { recognition.stop(); } catch (e) {}
+                  }
+                }, 2100);
+              }
+            };
+
+            recognition.onerror = (ev) => {
+              const code = ev && ev.error ? ev.error : 'unknown';
+              if (code === 'no-speech') return; // Wait patiently instead of killing immediately
+              clearTimeout(silenceTimer);
+              isListening = false;
+              micBtn.classList.remove('is-listening');
+              stopMicVisualizer();
+              if (code === 'not-allowed' || code === 'service-not-allowed') {
+                showVoiceHint('Allow mic permission in browser bar (or use Chrome/Edge)');
+              } else if (code === 'network') {
+                showVoiceHint('Browser blocked speech service — try Chrome/Edge on HTTPS');
+              } else {
+                showVoiceHint('Voice input unavailable — please type your question');
+              }
+            };
+
+            recognition.onend = () => {
+              if (isListening) {
+                finishVoiceSession(true);
+              } else {
+                stopMicVisualizer();
+              }
+            };
+
+            recognition.start();
+          } catch (e) {
+            isListening = false;
+            micBtn.classList.remove('is-listening');
+            stopMicVisualizer();
+            showVoiceHint('Voice input unavailable in this browser');
+          }
+        }
 
         micBtn.addEventListener('click', () => {
-          if (isBusy) return;
           if (isListening) {
-            try { recognition.stop(); } catch (e) {}
+            manualStop = true;
+            try { if (recognition) recognition.stop(); } catch (e) { finishVoiceSession(true); }
           } else {
-            try { recognition.start(); } catch (e) {}
+            startVoiceSession();
           }
         });
       }
