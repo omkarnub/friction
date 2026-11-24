@@ -30,7 +30,7 @@
     if (!homeSection) return;
 
     // Selector for homepage landmark headings
-    const headingSelector = '.get-started-title, .learn-qa-question, .learn-method-title, .learn-point-title';
+    const headingSelector = '.hs-index-anchor, .get-started-title, .learn-qa-question, .learn-method-title, .learn-point-title';
 
     // Create Rail Navigation DOM
     const nav = document.createElement('nav');
@@ -98,7 +98,7 @@
 
       const headings = Array.from(homeSection.querySelectorAll(headingSelector));
       list = headings.map(el => {
-        let text = el.textContent ? el.textContent.trim() : '';
+        let text = (el.getAttribute('data-index-label') || el.textContent || '').trim();
         // Clean up overly long questions for label badge
         if (text.length > 32) {
           text = text.slice(0, 30) + '…';
@@ -400,7 +400,7 @@
           measure();
           updateVisibility();
           schedule();
-        }, 550);
+        }, 1650);
       });
     }
 

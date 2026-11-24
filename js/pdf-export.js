@@ -19,7 +19,7 @@
   function generatePDF() {
     // Check jsPDF availability
     if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
-      alert('PDF export library is still loading. Please try again in a moment.');
+      if (typeof window.showSimToast === 'function') window.showSimToast('PDF Export', 'PDF export library is still loading. Please try again in a moment.');
       return;
     }
 

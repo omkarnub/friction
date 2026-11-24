@@ -55,7 +55,7 @@
         deviationEl.style.color = 'var(--accent-green)';
         verdictEl.innerHTML = '<span class="status-badge success" style="font-size: 0.85rem;">Excellent agreement — both methods yield consistent <span class="sym">μ</span></span>';
       } else if (deviation < 15) {
-        deviationEl.style.color = 'var(--accent-amber)';
+        deviationEl.style.color = 'var(--text-secondary)';
         verdictEl.innerHTML = '<span class="status-badge warning" style="font-size: 0.85rem;">Moderate deviation — results are reasonable but could be improved</span>';
       } else {
         deviationEl.style.color = 'var(--accent-red)';
@@ -113,8 +113,8 @@
     // Reference range band
     const refLowY = yPos(Math.max(mat.low, minV));
     const refHighY = yPos(Math.min(mat.high, maxV));
-    html += `<rect x="${pad.left}" y="${refHighY}" width="${W - pad.left - pad.right}" height="${Math.max(0, refLowY - refHighY)}" fill="rgba(90, 140, 160,0.08)" rx="3"/>`;
-    html += `<text x="${W - pad.right - 5}" y="${refHighY + 14}" text-anchor="end" fill="var(--accent-blue)" font-size="10" font-family="JetBrains Mono" opacity="0.7">Ref Range</text>`;
+    html += `<rect x="${pad.left}" y="${refHighY}" width="${W - pad.left - pad.right}" height="${Math.max(0, refLowY - refHighY)}" fill="rgba(160, 160, 160, 0.11)" rx="3"/>`;
+    html += `<text x="${W - pad.right - 5}" y="${refHighY + 14}" text-anchor="end" fill="var(--text-primary)" font-size="10" font-family="JetBrains Mono" opacity="0.7">Ref Range</text>`;
 
     // Bar width and positions
     const barWidth = 80;
@@ -127,16 +127,16 @@
     if (statsA.meanMu !== null) {
       const barY = yPos(statsA.meanMu);
       const barH = yPos(minV) - barY;
-      html += `<rect x="${bar1X}" y="${barY}" width="${barWidth}" height="${Math.max(0, barH)}" rx="4" fill="var(--accent-blue)" opacity="0.7"/>`;
-      html += `<text x="${bar1X + barWidth / 2}" y="${barY - 8}" text-anchor="middle" fill="var(--accent-cyan)" font-size="13" font-family="JetBrains Mono" font-weight="700">${statsA.meanMu.toFixed(4)}</text>`;
+      html += `<rect x="${bar1X}" y="${barY}" width="${barWidth}" height="${Math.max(0, barH)}" rx="2" fill="var(--text-primary)" opacity="0.88" class="cmp-bar-rect"/>`;
+      html += `<text x="${bar1X + barWidth / 2}" y="${barY - 8}" text-anchor="middle" fill="var(--text-primary)" font-size="13" font-family="JetBrains Mono" font-weight="700">${statsA.meanMu.toFixed(4)}</text>`;
     }
 
     // Bar B — Friction Plane
     if (statsB.meanMu !== null) {
       const barY = yPos(statsB.meanMu);
       const barH = yPos(minV) - barY;
-      html += `<rect x="${bar2X}" y="${barY}" width="${barWidth}" height="${Math.max(0, barH)}" rx="4" fill="var(--accent-amber)" opacity="0.7"/>`;
-      html += `<text x="${bar2X + barWidth / 2}" y="${barY - 8}" text-anchor="middle" fill="var(--accent-amber)" font-size="13" font-family="JetBrains Mono" font-weight="700">${statsB.meanMu.toFixed(4)}</text>`;
+      html += `<rect x="${bar2X}" y="${barY}" width="${barWidth}" height="${Math.max(0, barH)}" rx="2" fill="var(--text-primary)" opacity="0.92" class="cmp-bar-rect"/>`;
+      html += `<text x="${bar2X + barWidth / 2}" y="${barY - 8}" text-anchor="middle" fill="var(--text-secondary)" font-size="13" font-family="JetBrains Mono" font-weight="700">${statsB.meanMu.toFixed(4)}</text>`;
     }
 
     // Labels
@@ -155,6 +155,7 @@
     html += `<text x="15" y="${H / 2}" text-anchor="middle" fill="var(--text-dim)" font-size="12" font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif" transform="rotate(-90, 15, ${H / 2})">Mean μ</text>`;
 
     svg.innerHTML = html;
+    window.dispatchEvent(new CustomEvent("comparerendered"));
   }
 
   // Expose for data-log.js to call

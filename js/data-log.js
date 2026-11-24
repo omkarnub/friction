@@ -107,14 +107,22 @@
     const trigger = dropdown.querySelector('.radix-trigger');
 
     const METHODS = {
-      repose: { name: 'Angle of Repose', icon: '📐', desc: 'Inclined plane limiting angle method' },
-      friction: { name: 'Friction Plane', icon: '⚖', desc: 'Horizontal & inclined pull-force method' }
+      repose: {
+        name: 'Angle of Repose',
+        icon: '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 13h12M2 13L13 4"/><path d="M7.5 13a5.5 5.5 0 0 0-1.2-3.4"/></svg>',
+        desc: 'Inclined plane limiting angle method'
+      },
+      friction: {
+        name: 'Friction Plane',
+        icon: '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11.5" cy="4.5" r="2"/><path d="M2 12.5l8-5.5M13.5 4.5V12M11.5 12h4"/></svg>',
+        desc: 'Horizontal & inclined pull-force method'
+      }
     };
 
     function updateTrigger(val) {
       const m = METHODS[val] || METHODS.repose;
       activeText.textContent = m.name;
-      if (activeIcon) activeIcon.textContent = m.icon;
+      if (activeIcon) activeIcon.innerHTML = m.icon;
     }
 
     // Populate dropdown options
@@ -517,7 +525,7 @@
 
   // Clear all
   document.getElementById('clearLogBtn').addEventListener('click', () => {
-    if (!confirm('Clear all log entries? This cannot be undone.')) return;
+    if (typeof window.showSimToast === 'function' && !window._clearLogArmed) { window._clearLogArmed = true; window.showSimToast('Confirm Clear', 'Click Clear again within 4s to remove all entries.'); setTimeout(() => { window._clearLogArmed = false; }, 4000); return; } window._clearLogArmed = false;
     logEntries = [];
     lastAddedIdx = -1;
     saveToStorage();
@@ -658,7 +666,7 @@
     const pctEl = document.getElementById('logPercentError');
     if (percentError !== null) {
       animateStatNumber(pctEl, percentError, 2, '%');
-      pctEl.style.color = percentError < 10 ? 'var(--accent-green)' : percentError < 25 ? 'var(--accent-amber)' : 'var(--accent-red)';
+      pctEl.style.color = percentError < 10 ? 'var(--accent-green)' : percentError < 25 ? 'var(--text-secondary)' : 'var(--accent-red)';
     } else {
       pctEl.textContent = '—';
     }
@@ -745,20 +753,20 @@
     const refLowY = yPos(Math.max(mat.low, minMu));
     const refHighY = yPos(Math.min(mat.high, maxMu));
     if (mat.high >= minMu && mat.low <= maxMu) {
-      html += `<rect x="${pad.left}" y="${refHighY}" width="${plotW}" height="${Math.max(0, refLowY - refHighY)}" fill="rgba(56, 189, 248, 0.08)" rx="3"/>`;
-      html += `<text x="${W - pad.right - 5}" y="${refHighY + 12}" text-anchor="end" fill="var(--accent-cyan)" font-size="9.5" font-family="JetBrains Mono" opacity="0.75">Ref: ${mat.low}–${mat.high}</text>`;
+      html += `<rect x="${pad.left}" y="${refHighY}" width="${plotW}" height="${Math.max(0, refLowY - refHighY)}" fill="rgba(160, 160, 160, 0.11)" rx="3"/>`;
+      html += `<text x="${W - pad.right - 5}" y="${refHighY + 12}" text-anchor="end" fill="var(--text-primary)" font-size="9.5" font-family="JetBrains Mono" opacity="0.75">Ref: ${mat.low}–${mat.high}</text>`;
     }
 
     // Mean line
     const meanMu = muValues.reduce((a, b) => a + b, 0) / muValues.length;
     const meanY = yPos(meanMu);
-    html += `<line x1="${pad.left}" y1="${meanY}" x2="${W - pad.right}" y2="${meanY}" stroke="var(--accent-amber)" stroke-width="1.8" stroke-dasharray="6,4" opacity="0.8"/>`;
-    html += `<text x="${pad.left + 6}" y="${meanY - 6}" fill="var(--accent-amber)" font-size="10" font-family="JetBrains Mono" font-weight="600">Mean: ${meanMu.toFixed(4)}</text>`;
+    html += `<line x1="${pad.left}" y1="${meanY}" x2="${W - pad.right}" y2="${meanY}" stroke="var(--text-secondary)" stroke-width="1.8" stroke-dasharray="6,4" opacity="0.8"/>`;
+    html += `<text x="${pad.left + 6}" y="${meanY - 6}" fill="var(--text-secondary)" font-size="10" font-family="JetBrains Mono" font-weight="600">Mean: ${meanMu.toFixed(4)}</text>`;
 
     // Line path with draw animation
     if (validEntries.length > 1) {
       const pathD = validEntries.map((e, i) => `${i === 0 ? 'M' : 'L'} ${xPos(i).toFixed(1)} ${yPos(e.mu).toFixed(1)}`).join(' ');
-      html += `<path d="${pathD}" fill="none" stroke="var(--accent-cyan)" stroke-width="2.5" opacity="0.85" class="chart-animated-path"/>`;
+      html += `<path d="${pathD}" fill="none" stroke="var(--text-primary)" stroke-width="2.2" opacity="0.85" class="chart-animated-path"/>`;
     }
 
     // Data points with pop-in animation
@@ -781,6 +789,7 @@
     html += `<text x="15" y="${H / 2}" text-anchor="middle" fill="var(--text-dim)" font-size="12" font-family="'Cambria Math', 'Times New Roman', 'DejaVu Sans', serif" transform="rotate(-90, 15, ${H / 2})">μ</text>`;
 
     svg.innerHTML = html;
+    window.dispatchEvent(new CustomEvent("datalogrendered"));
   }
 
   /* ================================================================
@@ -795,7 +804,7 @@
       const list = filtered.length > 0 ? filtered : logEntries;
 
       if (list.length === 0) {
-        alert('No data log entries to export.');
+        if (typeof window.showSimToast === 'function') window.showSimToast('Export', 'No data log entries to export.');
         return;
       }
 
@@ -822,7 +831,7 @@
       const material = logMaterialSelect.value;
       const filtered = logEntries.filter(e => e.method === method && e.material === material);
       if (filtered.length === 0) {
-        alert('No entries to copy for current selection.');
+        if (typeof window.showSimToast === 'function') window.showSimToast('Copy', 'No entries to copy for current selection.');
         return;
       }
 

@@ -1281,9 +1281,11 @@
       wrapArc.setAttribute('d', `M ${entryX.toFixed(1)} ${entryY.toFixed(1)} A ${PULLEY_R} ${PULLEY_R} 0 0 1 ${rDropWorldX.toFixed(1)} ${rDropWorldY.toFixed(1)}`);
     }
 
-    // Hanging pan drops down as block climbs
-    const panDropBase = 62;
-    const panDropDist = panDropBase + (willMove ? climbOffset : 0);
+    // Hanging pan drops down as block climbs — clamped cleanly above the workbench floor
+    const panDropBase = 58;
+    const maxPanFloorY = 368;
+    const maxSafeDrop = Math.max(24, maxPanFloorY - rDropWorldY);
+    const panDropDist = Math.min(panDropBase + (willMove ? climbOffset : 0), maxSafeDrop);
 
     if (hangAnchor) {
       hangAnchor.setAttribute('transform', `translate(${rDropWorldX.toFixed(1)}, ${rDropWorldY.toFixed(1)})`);
