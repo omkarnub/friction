@@ -837,6 +837,20 @@
     let micAudioCtx = null;
     let micRaf = 0;
     let silenceTimer = null;
+    // Phones: holding a separate mic stream next to SpeechRecognition, and continuous mode,
+    // are what make Android Chrome drop words or repeat text. Keep both for desktop only.
+    const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+
+    // Speech engines often mishear lab vocabulary; fix the common ones before sending.
+    function fixSpokenTerms(text) {
+      return String(text || '')
+        .replace(/\bfiction\b/gi, 'friction')
+        .replace(/\bfriction (plain|plane's|plains)\b/gi, 'friction plane')
+        .replace(/\bangle of (repels|repost|reposed|rebus)\b/gi, 'angle of repose')
+        .replace(/\bco[- ]?efficient of fiction\b/gi, 'coefficient of friction')
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+    }
 
     function stopMicVisualizer() {
       if (micRaf) { cancelAnimationFrame(micRaf); micRaf = 0; }
@@ -857,7 +871,7 @@
       let analyser = null;
       let dataArr = null;
 
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      if (!IS_MOBILE && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
           micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
           const AC = window.AudioContext || window.webkitAudioContext;
@@ -915,7 +929,7 @@
           micBtn.classList.remove('is-listening');
           stopMicVisualizer();
           input.placeholder = 'Ask about friction physics…';
-          const spoken = (finalTranscript || input.value || '').trim();
+          const spoken = fixSpokenTerms(finalTranscript || input.value || '');
           if (shouldSend && spoken) {
             if (voiceBtn && !voiceOutEnabled && 'speechSynthesis' in window) {
               voiceOutEnabled = true;
@@ -935,8 +949,8 @@
 
           try {
             recognition = new SR();
-            recognition.lang = 'en-US';
-            recognition.continuous = true;
+            recognition.lang = 'en-IN';
+            recognition.continuous = !IS_MOBILE;
             recognition.interimResults = true;
             recognition.maxAlternatives = 1;
 
@@ -957,7 +971,7 @@
               }
               input.value = (finalTranscript + interim).trim();
 
-              // Auto-send smoothly after 2.1s of silence once user has spoken
+              // Auto-send smoothly after 2.8s of silence once user has spoken
               clearTimeout(silenceTimer);
               if (input.value.trim().length > 1) {
                 silenceTimer = setTimeout(() => {
@@ -965,7 +979,7 @@
                     manualStop = true;
                     try { recognition.stop(); } catch (e) {}
                   }
-                }, 2100);
+                }, 2800);
               }
             };
 
