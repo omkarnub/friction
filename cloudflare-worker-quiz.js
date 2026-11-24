@@ -1,12 +1,53 @@
+// Only these sites may call this worker from a browser.
+const ALLOWED_ORIGINS = [
+  'https://frictions.vercel.app',
+  'http://localhost:3000',
+  'http://localhost:5173',
+  'http://localhost:8080',
+  'http://127.0.0.1:5500'
+];
+
+// Best-effort per-IP limit (kept in memory, resets when the worker restarts).
+const RATE_LIMIT = 20;          // requests
+const RATE_WINDOW_MS = 60000;   // per minute
+const hits = new Map();
+
+function rateLimited(ip) {
+  const now = Date.now();
+  const recent = (hits.get(ip) || []).filter(t => now - t < RATE_WINDOW_MS);
+  recent.push(now);
+  hits.set(ip, recent);
+  if (hits.size > 5000) {
+    for (const [k, v] of hits) {
+      if (!v.some(t => now - t < RATE_WINDOW_MS)) hits.delete(k);
+    }
+  }
+  return recent.length > RATE_LIMIT;
+}
+
 export default {
   async fetch(request, env) {
+    const origin = request.headers.get('Origin') || '';
+    if (!ALLOWED_ORIGINS.includes(origin)) {
+      return new Response('Forbidden', { status: 403 });
+    }
+
     const cors = {
-      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Origin': origin,
+      'Vary': 'Origin',
       'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type'
     };
 
     if (request.method === 'OPTIONS') return new Response(null, { headers: cors });
+
+    const ip = request.headers.get('CF-Connecting-IP') || 'unknown';
+    if (rateLimited(ip)) {
+      const msg = 'Too many requests. Please wait a minute and try again.';
+      return new Response(JSON.stringify({ error: msg, reply: msg, questions: [] }), {
+        status: 200, headers: { ...cors, 'Content-Type': 'application/json' }
+      });
+    }
 
     try {
       const body = request.method === 'POST'
